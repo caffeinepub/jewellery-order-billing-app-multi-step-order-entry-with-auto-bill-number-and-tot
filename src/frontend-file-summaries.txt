@@ -1,0 +1,21 @@
+{
+  "frontend/src/index.css": "Global styles with jewellery-themed OKLCH color system featuring warm gold/amber tones and elegant neutrals for both light and dark modes.",
+  "frontend/tailwind.config.js": "Tailwind configuration extended with jewellery theme colors, Inter font family, and custom design tokens for consistent styling.",
+  "frontend/src/App.tsx": "Main application component managing authentication flow, view switching between dashboard/wizard/orders, and coordinating edit-order flow with editingBillNo state and success payload tracking for both create and update operations.",
+  "frontend/src/components/Header.tsx": "Application header with branding and login/logout functionality, simplified without user profile display.",
+  "frontend/src/components/Footer.tsx": "Minimal footer component displaying only copyright notice with current year.",
+  "frontend/src/components/LoginPrompt.tsx": "Login prompt card displayed to unauthenticated users with Internet Identity integration.",
+  "frontend/src/components/ProfileSetup.tsx": "Profile setup form for first-time users to enter their name after authentication.",
+  "frontend/src/components/StepIndicator.tsx": "Reusable 4-step progress indicator showing current step with visual feedback and step labels.",
+  "frontend/src/features/orders/orderTypes.ts": "Type definitions, constants including ORDER_STATUSES array with fixed status options (Pending, On process, Delivered, Cancelled), and helper function for order form data including materials, order types, initial form state, and getWeightFieldsEnabled function.",
+  "frontend/src/features/orders/OrderWizard.tsx": "Multi-step order entry wizard supporting both new-order and edit-order modes with prefilled data loading, validation, auto-calculations, conditional field enabling including Material=\"Other\" override that disables all weight inputs and rate/material cost fields, and separate save/update flows with loading states.",
+  "frontend/src/features/orders/usePlaceOrder.ts": "React Query mutation hook for creating new orders with robust numeric field sanitization, BigInt conversion safety, user-friendly error handling, and cache invalidation for both recentOrders and orderStats.",
+  "frontend/src/features/orders/useRecentOrders.ts": "React Query hook for fetching recent orders from the backend.",
+  "frontend/src/features/orders/OrdersView.tsx": "Orders list view displaying recent orders in a table with Edit action buttons per row, success confirmation for both saved and updated orders, and navigation callbacks.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks file with placeholder for future backend queries, currently contains only user role query.",
+  "frontend/src/features/dashboard/DashboardView.tsx": "Dashboard view displaying order statistics, material breakdown, and recent orders preview with Edit action buttons per row and navigation callbacks for new order, view all orders, and edit order flows.",
+  "frontend/src/features/dashboard/useOrderStats.ts": "React Query hook for fetching aggregate order statistics from the backend actor.",
+  "frontend/src/lib/formatters.ts": "Utility functions for formatting timestamps and weight values consistently across the application.",
+  "frontend/src/features/orders/useGetOrder.ts": "React Query hook for fetching a single order by billNo with actor-availability gating and English error handling for authorization and not-found cases.",
+  "frontend/src/features/orders/useUpdateOrder.ts": "React Query mutation hook for updating existing orders with numeric field sanitization, BigInt conversion, English error handling, and cache invalidation for recentOrders and orderStats queries."
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-when-the-order-wizard-form-field-material-is-set-to-other-disable-the-entire-weight-step-inputs-exchange-wt-deduct-wt-added-wt-and-total-wt-so-they-are-not-editable",
+      "title": "When the Order Wizard form field Material is set to \"Other\", disable the entire Weight step inputs (Exchange Wt, Deduct Wt, Added Wt, and Total Wt) so they are not editable.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-material-is-set-to-other-disable-the-amount-step-inputs-rate-gram-ratepergm-and-material-cost-materialcost-so-they-are-not-editable",
+      "title": "When Material is set to \"Other\", disable the Amount step inputs Rate/gram (ratePerGm) and Material Cost (materialCost) so they are not editable.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-year-built-with-using-caffeine-ai-attribution-from-the-app-footer-while-keeping-the-footer-component-layout-intact-no-broken-spacing",
+      "title": "Remove the \"© {year} · Built with using caffeine.ai\" attribution from the app footer while keeping the footer component layout intact (no broken spacing).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "When Material is selected as \"Other\", deactivate/disable the Weight section in the form",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "When Material is selected as \"Other\", deactivate/disable Rate/gram and Material Cost fields in the Amount section",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Remove \"© 2026 · Built with using caffeine.ai\" from the footer",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Jewellery Orders",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

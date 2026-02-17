@@ -1,0 +1,54 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "OrderWizard: disable Weight + Amount fields for Material=Other; remove footer attribution",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "When Material is \"Other\", disable all editable Weight step inputs and keep Total Wt consistent (e.g., 0.00).",
+      "acceptanceCriteria": [
+        "In OrderWizard Step 2 (Weight), when Material = \"Other\", the inputs Exchange Wt, Deduct Wt, and Added Wt are disabled (non-interactive) and visually appear disabled (e.g., muted styling).",
+        "Total Wt remains non-editable (as it already is) and reflects a value consistent with disabled weight inputs (e.g., 0.00 if other weight fields are zeroed).",
+        "Switching Material from \"Other\" back to another material re-enables the Weight inputs according to the existing order-type-based rules."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/orders/OrderWizard.tsx",
+          "operation": "modify",
+          "description": "Add a Material=\"Other\" override for Step 2 (Weight): compute a derived flag (e.g., isMaterialOther) and use it to (1) disable Exchange Wt / Deduct Wt / Added Wt regardless of existing order-type-based enabling rules, (2) apply the existing muted/disabled visual treatment when the override is active, and (3) on transition to Material=\"Other\", zero exchangeWt/deductWt/addedWt so Total Wt recalculates to a consistent value (typically 0.00) while keeping Total Wt read-only."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "When Material is \"Other\", disable Rate/gram and Material Cost in the Amount step and keep them at 0 for consistent calculations.",
+      "acceptanceCriteria": [
+        "In OrderWizard Step 3 (Amount), when Material = \"Other\", Rate/gram and Material Cost inputs are disabled (non-interactive) and visually appear disabled.",
+        "When Material changes to \"Other\", Rate/gram and Material Cost values are set/kept at \"0\" so downstream calculations (e.g., Total Cost) remain consistent.",
+        "Switching Material from \"Other\" back to another material re-enables Rate/gram and continues existing auto-calculation behavior for Material Cost."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/orders/OrderWizard.tsx",
+          "operation": "modify",
+          "description": "Update Step 3 (Amount) to respect Material=\"Other\": disable the Rate/gm (ratePerGm) input with muted/disabled styling when Material is Other; ensure Material Cost remains non-editable and also visually indicates disabled state under this condition; add Material-change handling to set/keep ratePerGm and materialCost at \"0\" when Material becomes Other so auto-calculations (materialCost and totalCost) remain consistent, and re-enable Rate/gm when Material is switched back."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Remove the caffeine.ai attribution from the footer while preserving footer layout and spacing.",
+      "acceptanceCriteria": [
+        "The footer no longer displays the \"Built with ... caffeine.ai\" text/link or the heart icon.",
+        "The footer still renders without UI glitches (no empty line with odd padding or misalignment)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Remove the \"Built with ... caffeine.ai\" attribution content (including the Heart icon and link) while keeping the footer container structure and spacing intact (e.g., keep a minimal centered line such as © {year} or adjust markup so there is no empty padded row/misalignment)."
+        }
+      ]
+    }
+  ]
+}

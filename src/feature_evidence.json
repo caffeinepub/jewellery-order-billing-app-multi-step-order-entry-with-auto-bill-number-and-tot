@@ -1,0 +1,62 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-when-the-order-wizard-form-field-material-is-set-to-other-disable-the-entire-weight-step-inputs-exchange-wt-deduct-wt-added-wt-and-total-wt-so-they-are-not-editable",
+      "featureTitle": "When the Order Wizard form field Material is set to \"Other\", disable the entire Weight step inputs (Exchange Wt, Deduct Wt, Added Wt, and Total Wt) so they are not editable.",
+      "files": [
+        "frontend/src/features/orders/OrderWizard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-when-material-is-set-to-other-disable-the-amount-step-inputs-rate-gram-ratepergm-and-material-cost-materialcost-so-they-are-not-editable",
+      "featureTitle": "When Material is set to \"Other\", disable the Amount step inputs Rate/gram (ratePerGm) and Material Cost (materialCost) so they are not editable.",
+      "files": [
+        "frontend/src/features/orders/OrderWizard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-remove-the-year-built-with-using-caffeine-ai-attribution-from-the-app-footer-while-keeping-the-footer-component-layout-intact-no-broken-spacing",
+      "featureTitle": "Remove the \"© {year} · Built with using caffeine.ai\" attribution from the app footer while keeping the footer component layout intact (no broken spacing).",
+      "files": [
+        "frontend/src/components/Footer.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

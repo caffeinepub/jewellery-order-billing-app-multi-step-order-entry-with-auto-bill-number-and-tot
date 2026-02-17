@@ -1,2 +1,3 @@
-# jewellery-order-billing-app-multi-step-order-entry-with-auto-bill-number-and-tot
-Exported from Caffeine project: Jewellery order/billing app: multi-step order entry with auto bill number and totals
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

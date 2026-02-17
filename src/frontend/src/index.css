@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        /* Jewellery theme: warm gold and elegant neutrals */
+        --background: 0.98 0.01 60;
+        --foreground: 0.25 0.02 40;
+        --card: 1 0 0;
+        --card-foreground: 0.25 0.02 40;
+        --popover: 1 0 0;
+        --popover-foreground: 0.25 0.02 40;
+        /* Primary: Rich gold */
+        --primary: 0.65 0.15 65;
+        --primary-foreground: 0.98 0.01 60;
+        /* Secondary: Warm amber */
+        --secondary: 0.88 0.08 55;
+        --secondary-foreground: 0.25 0.02 40;
+        --muted: 0.94 0.02 50;
+        --muted-foreground: 0.50 0.02 40;
+        /* Accent: Copper/rose gold */
+        --accent: 0.70 0.12 35;
+        --accent-foreground: 0.98 0.01 60;
+        --destructive: 0.577 0.245 27.325;
+        --destructive-foreground: 0.985 0 0;
+        --border: 0.88 0.03 50;
+        --input: 0.88 0.03 50;
+        --ring: 0.65 0.15 65;
+        --chart-1: 0.65 0.15 65;
+        --chart-2: 0.70 0.12 35;
+        --chart-3: 0.55 0.10 45;
+        --chart-4: 0.75 0.08 55;
+        --chart-5: 0.60 0.13 50;
+    }
+
+    .dark {
+        --background: 0.18 0.02 40;
+        --foreground: 0.95 0.01 60;
+        --card: 0.22 0.02 40;
+        --card-foreground: 0.95 0.01 60;
+        --popover: 0.20 0.02 40;
+        --popover-foreground: 0.95 0.01 60;
+        /* Primary: Bright gold for dark mode */
+        --primary: 0.75 0.18 65;
+        --primary-foreground: 0.18 0.02 40;
+        /* Secondary: Muted gold */
+        --secondary: 0.35 0.04 50;
+        --secondary-foreground: 0.95 0.01 60;
+        --muted: 0.30 0.03 45;
+        --muted-foreground: 0.70 0.02 50;
+        /* Accent: Rose gold */
+        --accent: 0.65 0.12 35;
+        --accent-foreground: 0.95 0.01 60;
+        --destructive: 0.704 0.191 22.216;
+        --destructive-foreground: 0.95 0.01 60;
+        --border: 0.30 0.03 45;
+        --input: 0.30 0.03 45;
+        --ring: 0.75 0.18 65;
+        --chart-1: 0.75 0.18 65;
+        --chart-2: 0.65 0.12 35;
+        --chart-3: 0.60 0.10 45;
+        --chart-4: 0.70 0.08 55;
+        --chart-5: 0.68 0.13 50;
+    }
+
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+}
+
