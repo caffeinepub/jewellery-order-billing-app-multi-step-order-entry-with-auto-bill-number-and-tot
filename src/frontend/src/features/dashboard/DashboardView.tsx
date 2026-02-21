@@ -2,24 +2,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { useOrderStats } from './useOrderStats';
 import { useRecentOrders } from '../orders/useRecentOrders';
+import { useRepairOrderStats } from '../repairs/useRepairOrderStats';
+import { useRecentRepairOrders } from '../repairs/useRecentRepairOrders';
 import { formatDate, formatWeight } from '@/lib/formatters';
-import { Package, Scale, TrendingUp, Loader2, Edit } from 'lucide-react';
+import { Package, Scale, TrendingUp, Loader2, Edit, Wrench } from 'lucide-react';
 
 interface DashboardViewProps {
   onNewOrder: () => void;
   onViewOrders: () => void;
   onEditOrder: (billNo: number) => void;
+  onViewRepairs: () => void;
+  onEditRepair: (repairId: number) => void;
 }
 
-export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder }: DashboardViewProps) {
+export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder, onViewRepairs, onEditRepair }: DashboardViewProps) {
   const { data: stats, isLoading: statsLoading, error: statsError } = useOrderStats();
   const { data: recentOrders, isLoading: ordersLoading, error: ordersError } = useRecentOrders(5);
+  const { data: repairStats, isLoading: repairStatsLoading, error: repairStatsError } = useRepairOrderStats();
+  const { data: recentRepairs, isLoading: repairsLoading } = useRecentRepairOrders(5);
+
+  const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+      case 'complete':
+        return 'default';
+      case 'on process':
+        return 'secondary';
+      case 'cancelled':
+        return 'destructive';
+      case 'pending':
+      default:
+        return 'outline';
+    }
+  };
+
+  const formatCurrency = (value: bigint): string => {
+    return `₹${(Number(value) / 100).toFixed(2)}`;
+  };
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
+      {/* Order Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -70,6 +96,73 @@ export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder }:
         </Card>
       </div>
 
+      {/* Repair Order Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Repairs</CardTitle>
+            <Wrench className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {repairStatsLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            ) : repairStatsError ? (
+              <p className="text-sm text-destructive">Error loading</p>
+            ) : (
+              <div className="text-2xl font-bold">{Number(repairStats?.totalOrders || 0)}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Material Cost</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {repairStatsLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            ) : repairStatsError ? (
+              <p className="text-sm text-destructive">Error loading</p>
+            ) : (
+              <div className="text-2xl font-bold">{formatCurrency(repairStats?.totalMaterialCost || BigInt(0))}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Making Charge</CardTitle>
+            <Scale className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {repairStatsLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            ) : repairStatsError ? (
+              <p className="text-sm text-destructive">Error loading</p>
+            ) : (
+              <div className="text-2xl font-bold">{formatCurrency(repairStats?.totalMakingCharge || BigInt(0))}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {repairStatsLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            ) : repairStatsError ? (
+              <p className="text-sm text-destructive">Error loading</p>
+            ) : (
+              <div className="text-2xl font-bold">{formatCurrency(repairStats?.totalCost || BigInt(0))}</div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Material Breakdown */}
       {stats && (
         <Card className="shadow-elegant">
@@ -83,6 +176,67 @@ export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder }:
                 <span className="font-semibold">{formatWeight(stats.totalCutWeight)} gm</span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Repair Orders Preview */}
+      {recentRepairs && recentRepairs.length > 0 && (
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Repair Orders</CardTitle>
+            <Button variant="outline" size="sm" onClick={onViewRepairs}>
+              View All
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {repairsLoading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            )}
+
+            {recentRepairs && recentRepairs.length > 0 && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Material</TableHead>
+                      <TableHead className="text-right">Total Cost</TableHead>
+                      <TableHead>Assigned To</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentRepairs.map((repair, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{formatDate(repair.date)}</TableCell>
+                        <TableCell>{repair.material}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatCurrency(repair.totalCost)}</TableCell>
+                        <TableCell>{repair.assignTo}</TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusBadgeVariant(repair.status)}>
+                            {repair.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEditRepair(index + 1)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -130,6 +284,8 @@ export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder }:
                     <TableHead>Date</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Material</TableHead>
+                    <TableHead>Delivery Date</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Net Wt. (gm)</TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
@@ -141,6 +297,17 @@ export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder }:
                       <TableCell>{formatDate(order.timestamp)}</TableCell>
                       <TableCell>{order.customerName}</TableCell>
                       <TableCell>{order.material}</TableCell>
+                      <TableCell>
+                        {order.deliveryDate && Number(order.deliveryDate) > 0 
+                          ? formatDate(order.deliveryDate)
+                          : <span className="text-muted-foreground">Not set</span>
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(order.pickupLocation || 'Pending')}>
+                          {order.pickupLocation || 'Pending'}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right">{formatWeight(order.netWeight)}</TableCell>
                       <TableCell className="text-center">
                         <Button

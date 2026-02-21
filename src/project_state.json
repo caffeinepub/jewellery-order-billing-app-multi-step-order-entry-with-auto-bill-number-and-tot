@@ -1,32 +1,52 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
+  "summary": "Jewelry shop management system with repair order tracking",
+  "architectural_notes": [
+    "Repair tracking system with material types (gold, silver, other)",
+    "Cost breakdown includes material cost and making charges",
+    "Dual status tracking: repair status (on process/complete) and delivery status (pending/delivered)"
+  ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-when-the-order-wizard-form-field-material-is-set-to-other-disable-the-entire-weight-step-inputs-exchange-wt-deduct-wt-added-wt-and-total-wt-so-they-are-not-editable",
-      "title": "When the Order Wizard form field Material is set to \"Other\", disable the entire Weight step inputs (Exchange Wt, Deduct Wt, Added Wt, and Total Wt) so they are not editable.",
+      "id": "feature-add-a-new-repair-section-to-the-main-navigation-menu-that-allows-users-to-create-and-manage-repair-orders-separately-from-regular-orders",
+      "title": "Add a new 'Repair' section to the main navigation menu that allows users to create and manage repair orders separately from regular orders",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-when-material-is-set-to-other-disable-the-amount-step-inputs-rate-gram-ratepergm-and-material-cost-materialcost-so-they-are-not-editable",
-      "title": "When Material is set to \"Other\", disable the Amount step inputs Rate/gram (ratePerGm) and Material Cost (materialCost) so they are not editable.",
+      "id": "feature-create-a-repairwizard-component-with-a-multi-step-form-capturing-date-material-selection-gold-silver-other-dropdown-added-material-weight-input-material-cost-input-making-charge-input-with-auto-calculated-total-cost-delivery-date-picker-assign-to-text-field-status-dropdown-on-process-complete-and-delivery-status-dropdown-pending-delivered",
+      "title": "Create a RepairWizard component with a multi-step form capturing date, material selection (gold/silver/other dropdown), added material weight input, material cost input, making charge input (with auto-calculated total cost), delivery date picker, assign to text field, status dropdown (on process/complete), and delivery status dropdown (pending/delivered)",
       "reqIds": [
-        "REQ-2"
+        "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-remove-the-year-built-with-using-caffeine-ai-attribution-from-the-app-footer-while-keeping-the-footer-component-layout-intact-no-broken-spacing",
-      "title": "Remove the \"© {year} · Built with using caffeine.ai\" attribution from the app footer while keeping the footer component layout intact (no broken spacing).",
+      "id": "feature-create-a-repairordersview-component-displaying-a-table-of-all-repair-orders-with-columns-for-id-date-material-added-weight-costs-delivery-date-assigned-to-status-and-delivery-status-with-edit-and-view-actions-for-each-repair-order",
+      "title": "Create a RepairOrdersView component displaying a table of all repair orders with columns for ID, date, material, added weight, costs, delivery date, assigned to, status, and delivery status, with edit and view actions for each repair order",
       "reqIds": [
-        "REQ-3"
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hooks-for-repair-orders-useplacerepairorder-useupdaterepairorder-usegetrepairorder-and-userecentrepairorders-following-the-same-patterns-as-existing-order-hooks",
+      "title": "Create React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders following the same patterns as existing order hooks",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-repair-orders-statistics-card-to-the-dashboard-showing-total-repair-orders-count-total-repairs-by-material-type-and-repairs-by-status",
+      "title": "Add a repair orders statistics card to the dashboard showing total repair orders count, total repairs by material type, and repairs by status",
+      "reqIds": [
+        "REQ-7"
       ],
       "version": 1
     }
@@ -34,24 +54,28 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "When Material is selected as \"Other\", deactivate/disable the Weight section in the form",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "When Material is selected as \"Other\", deactivate/disable Rate/gram and Material Cost fields in the Amount section",
+      "summary": "Create repair menu with date, material type, weight, costs, delivery tracking, assignment, and status fields",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Remove \"© 2026 · Built with using caffeine.ai\" from the footer",
-      "reqIds": [],
+      "summary": "Create a RepairOrder data type in the backend with fields: date (Nat timestamp), material (Text variant of gold/silver/other), addedMaterialWeight (Nat for grams * 100), materialCost (Nat for rupees * 100), makingCharge (Nat for rupees * 100), totalCost (Nat for rupees * 100), deliveryDate (Nat timestamp), assignTo (Text for staff assignment), status (Text variant of on_process/complete), and deliveryStatus (Text variant of pending/delivered)",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Implement backend CRUD functions for repair orders: createRepairOrder, updateRepairOrder, getRepairOrder, getRecentRepairOrders, and getRepairOrderStats with authorization checks similar to existing order functions",
+      "reqIds": [
+        "REQ-3"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Jewellery Orders",
+  "projectName": "Jewelry Shop Manager",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

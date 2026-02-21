@@ -1,12 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Make Order Wizard fields non-editable when Material is set to “Other”, and remove the footer attribution text without breaking layout.
+**Goal:** Add a complete repair order management system with its own navigation menu, CRUD operations, and dashboard statistics.
 
 **Planned changes:**
-- In OrderWizard Step 2 (Weight), when Material = “Other”, disable Exchange Wt, Deduct Wt, and Added Wt inputs with disabled styling, and keep Total Wt consistent with the disabled inputs.
-- In OrderWizard Step 3 (Amount), when Material = “Other”, disable Rate/gram and Material Cost inputs with disabled styling, and set/keep their values at 0 for consistent calculations.
-- Re-enable the above inputs when Material changes away from “Other”, respecting existing rules/auto-calculations.
-- Remove the “© {year} · Built with using caffeine.ai” footer attribution (including icon/link) while keeping the footer layout intact.
+- Add "Repair" section to main navigation menu
+- Create RepairOrder data type in backend with fields for date, material (gold/silver/other), added material weight, material cost, making charge, total cost, delivery date, assign to, status (on process/complete), and delivery status (pending/delivered)
+- Implement backend CRUD functions: createRepairOrder, updateRepairOrder, getRepairOrder, getRecentRepairOrders, and getRepairOrderStats with authorization checks
+- Create RepairWizard component with multi-step form for all repair order fields, including auto-calculated total cost
+- Create RepairOrdersView component displaying table of all repair orders with edit and view actions
+- Add React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders
+- Add repair orders statistics card to dashboard showing total count, breakdown by material type, and status breakdown
 
-**User-visible outcome:** Selecting Material = “Other” disables weight and rate/material cost fields in the wizard (and keeps totals consistent), and the footer no longer shows the caffeine.ai attribution while still displaying properly.
+**User-visible outcome:** Users can navigate to a dedicated Repair section to create and manage repair orders separately from regular orders, view repair statistics on the dashboard, and track repair status and delivery.

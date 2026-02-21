@@ -20,6 +20,19 @@ export function useUpdateOrder() {
         return BigInt(Math.round(num * 100));
       };
 
+      // Convert delivery date to nanoseconds (Time format)
+      const convertDateToTime = (dateStr: string): bigint => {
+        if (!dateStr) return BigInt(0);
+        try {
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) return BigInt(0);
+          // Convert milliseconds to nanoseconds
+          return BigInt(date.getTime()) * BigInt(1000000);
+        } catch {
+          return BigInt(0);
+        }
+      };
+
       try {
         await actor.updateOrder(
           BigInt(billNo),
@@ -27,13 +40,14 @@ export function useUpdateOrder() {
           formData.orderType,
           formData.material,
           formData.item.trim(),
-          formData.phoneNo.trim(),
-          formData.deliveryDate,
-          formData.assignTo.trim(),
-          formData.remarks.trim(),
-          sanitizeNumber(formData.exchangeWt),
-          sanitizeNumber(formData.deductWt),
-          sanitizeNumber(formData.addedWt)
+          formData.remarks.trim(), // palletType field used for remarks
+          formData.status, // pickupLocation field used for status
+          formData.assignTo.trim(), // deliveryAddress field used for assignTo
+          formData.phoneNo.trim(), // deliveryContact field
+          sanitizeNumber(formData.exchangeWt), // netWeight
+          sanitizeNumber(formData.addedWt), // grossWeight
+          sanitizeNumber(formData.deductWt), // cutWeight
+          convertDateToTime(formData.deliveryDate) // deliveryDate as Time
         );
       } catch (error: any) {
         // Handle authorization errors

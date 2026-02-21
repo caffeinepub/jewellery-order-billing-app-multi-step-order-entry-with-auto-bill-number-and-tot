@@ -5,10 +5,14 @@ import Order "mo:core/Order";
 import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
+import Int "mo:core/Int";
 import Principal "mo:core/Principal";
+import Migration "migration";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+// Apply state migration on upgrade
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -54,6 +58,7 @@ actor {
     netWeight : Nat;
     grossWeight : Nat;
     cutWeight : Nat;
+    deliveryDate : Time.Time;
   };
 
   module OrderRecord {
@@ -99,6 +104,7 @@ actor {
       netWeight;
       grossWeight;
       cutWeight;
+      deliveryDate = 0;
     };
 
     orders.add(billNo, order);
@@ -118,6 +124,7 @@ actor {
     netWeight : Nat,
     grossWeight : Nat,
     cutWeight : Nat,
+    deliveryDate : Time.Time,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update orders");
@@ -140,6 +147,7 @@ actor {
           netWeight;
           grossWeight;
           cutWeight;
+          deliveryDate;
         };
         orders.add(billNo, updatedOrder);
       };
@@ -192,6 +200,151 @@ actor {
       totalNetWeight;
       totalGrossWeight;
       totalCutWeight;
+    };
+  };
+
+  // New RepairOrder type and related functionality
+  type RepairOrderRecord = {
+    date : Time.Time;
+    material : Text;
+    addedMaterialWeight : Nat;
+    materialCost : Nat;
+    makingCharge : Nat;
+    totalCost : Nat;
+    deliveryDate : Time.Time;
+    assignTo : Text;
+    status : Text;
+    deliveryStatus : Text;
+  };
+
+  module RepairOrderRecord {
+    public func compare(a : RepairOrderRecord, b : RepairOrderRecord) : Order.Order {
+      Int.compare(b.date, a.date);
+    };
+  };
+
+  let repairOrders = Map.empty<Nat, RepairOrderRecord>();
+  var nextRepairId = 1;
+
+  public shared ({ caller }) func createRepairOrder(
+    date : Time.Time,
+    material : Text,
+    addedMaterialWeight : Nat,
+    materialCost : Nat,
+    makingCharge : Nat,
+    totalCost : Nat,
+    deliveryDate : Time.Time,
+    assignTo : Text,
+    status : Text,
+    deliveryStatus : Text,
+  ) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create repair orders");
+    };
+
+    let repairId = nextRepairId;
+    nextRepairId += 1;
+
+    let repairOrder : RepairOrderRecord = {
+      date;
+      material;
+      addedMaterialWeight;
+      materialCost;
+      makingCharge;
+      totalCost;
+      deliveryDate;
+      assignTo;
+      status;
+      deliveryStatus;
+    };
+
+    repairOrders.add(repairId, repairOrder);
+    repairId;
+  };
+
+  public shared ({ caller }) func updateRepairOrder(
+    repairId : Nat,
+    date : Time.Time,
+    material : Text,
+    addedMaterialWeight : Nat,
+    materialCost : Nat,
+    makingCharge : Nat,
+    totalCost : Nat,
+    deliveryDate : Time.Time,
+    assignTo : Text,
+    status : Text,
+    deliveryStatus : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update repair orders");
+    };
+
+    switch (repairOrders.get(repairId)) {
+      case (null) { Runtime.trap("Repair order not found") };
+      case (?_) {
+        let updatedRepairOrder : RepairOrderRecord = {
+          date;
+          material;
+          addedMaterialWeight;
+          materialCost;
+          makingCharge;
+          totalCost;
+          deliveryDate;
+          assignTo;
+          status;
+          deliveryStatus;
+        };
+        repairOrders.add(repairId, updatedRepairOrder);
+      };
+    };
+  };
+
+  public query ({ caller }) func getRepairOrder(repairId : Nat) : async RepairOrderRecord {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view repair orders");
+    };
+
+    switch (repairOrders.get(repairId)) {
+      case (null) { Runtime.trap("Repair order not found") };
+      case (?repairOrder) { repairOrder };
+    };
+  };
+
+  public query ({ caller }) func getRecentRepairOrders(count : Nat) : async [RepairOrderRecord] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view repair orders");
+    };
+
+    repairOrders.values().toArray().sort().sliceToArray(0, count);
+  };
+
+  public type RepairOrderStats = {
+    totalOrders : Nat;
+    totalMaterialCost : Nat;
+    totalMakingCharge : Nat;
+    totalCost : Nat;
+  };
+
+  public query ({ caller }) func getRepairOrderStats() : async RepairOrderStats {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get repair order stats");
+    };
+
+    var totalMaterialCost = 0;
+    var totalMakingCharge = 0;
+    var totalCost = 0;
+
+    for (repairOrder in repairOrders.values()) {
+      totalMaterialCost += repairOrder.materialCost;
+      totalMakingCharge += repairOrder.makingCharge;
+      totalCost += repairOrder.totalCost;
+    };
+
+    {
+      totalOrders = repairOrders.size();
+      totalMaterialCost;
+      totalMakingCharge;
+      totalCost;
     };
   };
 };

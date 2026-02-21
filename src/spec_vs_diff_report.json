@@ -1,47 +1,26 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T04:11:55.254Z",
-  "summary": "Footer attribution was removed and replaced with a minimal © {year} line. OrderWizard changes add logic for detecting Material=\"Other\", overriding weight-field enabled flags, clearing Order Type when Material is Other, and auto-zeroing weight fields; however, the diff snippet is truncated before showing the actual input components, so it’s not fully verifiable that the UI inputs in Steps 2 and 3 are disabled/visually muted and that rate/material-cost are handled per requirements.",
-  "missing_requirements": [
-    {
-      "id": "REQ-1",
-      "requirement": "When Material is set to \"Other\", disable the Weight step inputs (Exchange Wt, Deduct Wt, Added Wt) and keep Total Wt non-editable; switching back re-enables according to existing order-type rules.",
-      "reason": "The diff shows state/logic for overriding enabled flags and zeroing weight fields when Material is \"Other\", but the provided OrderWizard diff is truncated before the Step 2 input JSX, so there is no direct evidence that the actual inputs are rendered with disabled props and muted styling, nor that switching back restores the original order-type-based rules in the UI.",
-      "evidence": [
-        "frontend/src/features/orders/OrderWizard.tsx (truncated): shows isMaterialOther and effectiveWeightFieldsEnabled logic, but not the input rendering"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "When Material is set to \"Other\", disable Rate/gram (ratePerGm) and Material Cost (materialCost) in the Amount step, keep/set them to \"0\", and re-enable when switching back.",
-      "reason": "The diff snippet does not show any logic or JSX related to disabling ratePerGm/materialCost or forcing their values to 0 when Material becomes \"Other\". The file summary text mentions it, but there is no concrete evidence in the truncated diff excerpt.",
-      "evidence": [
-        "frontend/src/features/orders/OrderWizard.tsx (truncated): no visible changes for ratePerGm/materialCost disabling/zeroing"
-      ]
-    }
-  ],
-  "hallucinated_features": [
-    {
-      "description": "Automatically clear Order Type when Material is set to \"Other\".",
-      "reason": "Not requested by REQ-1/REQ-2/REQ-3; this adds additional behavior beyond disabling fields and removing footer attribution.",
-      "evidence": [
-        "frontend/src/features/orders/OrderWizard.tsx (truncated): \"// Clear Order Type when Material is \\\"Other\\\"\" useEffect sets orderType to ''"
-      ]
-    },
-    {
-      "description": "Auto-zero weight fields (exchangeWt/deductWt/addedWt) when Material becomes \"Other\".",
-      "reason": "REQ-1 requires disabling weight inputs; it does not explicitly require forcing these values to 0 (only suggests Total Wt consistency example). This is extra behavior.",
-      "evidence": [
-        "frontend/src/features/orders/OrderWizard.tsx (truncated): \"// Auto-zero weight fields when material becomes \\\"Other\\\"\" useEffect sets exchangeWt/deductWt/addedWt to '0'"
-      ]
-    }
-  ],
-  "confidence": 0.62,
+  "generatedAt": "2026-02-21T17:19:13.183Z",
+  "summary": "All requirements (REQ-1 through REQ-7) have been implemented. The diff shows complete backend and frontend implementation for repair order management including navigation, data types, CRUD operations, wizard form, table view, React Query hooks, and dashboard statistics. No missing requirements or hallucinated features detected.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.95,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/features/orders/OrderWizard.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/features/dashboard/DashboardView.tsx",
+    "frontend/src/features/repairs/RepairOrdersView.tsx",
+    "frontend/src/features/repairs/RepairWizard.tsx",
+    "frontend/src/features/repairs/repairTypes.ts",
+    "frontend/src/features/repairs/useGetRepairOrder.ts",
+    "frontend/src/features/repairs/usePlaceRepairOrder.ts",
+    "frontend/src/features/repairs/useRecentRepairOrders.ts",
+    "frontend/src/features/repairs/useRepairOrderStats.ts",
+    "frontend/src/features/repairs/useUpdateRepairOrder.ts",
     "project_state.json"
   ]
 }

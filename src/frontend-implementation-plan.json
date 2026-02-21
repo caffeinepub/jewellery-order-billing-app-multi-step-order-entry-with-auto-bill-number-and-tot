@@ -1,52 +1,124 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "OrderWizard: disable Weight + Amount fields for Material=Other; remove footer attribution",
+  "title": "Add repair order management menu",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "When Material is \"Other\", disable all editable Weight step inputs and keep Total Wt consistent (e.g., 0.00).",
+      "summary": "Add 'Repair' navigation option to main menu and wire repair orders view into the application router",
       "acceptanceCriteria": [
-        "In OrderWizard Step 2 (Weight), when Material = \"Other\", the inputs Exchange Wt, Deduct Wt, and Added Wt are disabled (non-interactive) and visually appear disabled (e.g., muted styling).",
-        "Total Wt remains non-editable (as it already is) and reflects a value consistent with disabled weight inputs (e.g., 0.00 if other weight fields are zeroed).",
-        "Switching Material from \"Other\" back to another material re-enables the Weight inputs according to the existing order-type-based rules."
+        "Navigation menu includes a 'Repair' option",
+        "Clicking 'Repair' navigates to the repair orders view",
+        "Repair section is accessible from the dashboard"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/orders/OrderWizard.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a Material=\"Other\" override for Step 2 (Weight): compute a derived flag (e.g., isMaterialOther) and use it to (1) disable Exchange Wt / Deduct Wt / Added Wt regardless of existing order-type-based enabling rules, (2) apply the existing muted/disabled visual treatment when the override is active, and (3) on transition to Material=\"Other\", zero exchangeWt/deductWt/addedWt so Total Wt recalculates to a consistent value (typically 0.00) while keeping Total Wt read-only."
+          "description": "Add 'repair' view state option to the existing view routing logic. Add state management for repair order editing (editingRepairId) similar to editingBillNo. Include routing logic to display RepairOrdersView and RepairWizard components based on view state."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Add a 'Repair' navigation button alongside existing Dashboard/Orders navigation. Wire the button to set view to 'repair' using the setView function passed from App.tsx."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "When Material is \"Other\", disable Rate/gram and Material Cost in the Amount step and keep them at 0 for consistent calculations.",
+      "id": "REQ-4",
+      "summary": "Create RepairWizard component with multi-step form for capturing all repair order fields including auto-calculated total cost",
       "acceptanceCriteria": [
-        "In OrderWizard Step 3 (Amount), when Material = \"Other\", Rate/gram and Material Cost inputs are disabled (non-interactive) and visually appear disabled.",
-        "When Material changes to \"Other\", Rate/gram and Material Cost values are set/kept at \"0\" so downstream calculations (e.g., Total Cost) remain consistent.",
-        "Switching Material from \"Other\" back to another material re-enables Rate/gram and continues existing auto-calculation behavior for Material Cost."
+        "Form includes all specified fields with appropriate input types",
+        "Material dropdown offers gold, silver, and other options",
+        "Total cost auto-calculates from material cost + making charge",
+        "Date and delivery date use date picker inputs",
+        "Status dropdowns show correct options",
+        "Form validation ensures required fields are filled",
+        "Successful submission creates a new repair order"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/orders/OrderWizard.tsx",
-          "operation": "modify",
-          "description": "Update Step 3 (Amount) to respect Material=\"Other\": disable the Rate/gm (ratePerGm) input with muted/disabled styling when Material is Other; ensure Material Cost remains non-editable and also visually indicates disabled state under this condition; add Material-change handling to set/keep ratePerGm and materialCost at \"0\" when Material becomes Other so auto-calculations (materialCost and totalCost) remain consistent, and re-enable Rate/gm when Material is switched back."
+          "path": "frontend/src/features/repairs/repairTypes.ts",
+          "operation": "create",
+          "description": "Define TypeScript types for repair orders: RepairFormData interface with fields (date, material, addedMaterialWeight, materialCost, makingCharge, totalCost, deliveryDate, assignTo, status, deliveryStatus). Define constants for REPAIR_MATERIALS (gold, silver, other), REPAIR_STATUSES (on_process, complete), and DELIVERY_STATUSES (pending, delivered)."
+        },
+        {
+          "path": "frontend/src/features/repairs/RepairWizard.tsx",
+          "operation": "create",
+          "description": "Create multi-step form wizard following the pattern from OrderWizard.tsx. Include steps for: (1) basic details (date, material dropdown, assign to), (2) measurements and costs (added material weight, material cost, making charge with auto-calculated total cost display), (3) delivery and status (delivery date picker, status dropdown, delivery status dropdown). Use StepIndicator component for progress visualization. Integrate usePlaceRepairOrder and useUpdateRepairOrder hooks. Handle both create and edit modes using editingRepairId prop."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Remove the caffeine.ai attribution from the footer while preserving footer layout and spacing.",
+      "id": "REQ-5",
+      "summary": "Create RepairOrdersView component displaying a table of all repair orders with edit and view actions",
       "acceptanceCriteria": [
-        "The footer no longer displays the \"Built with ... caffeine.ai\" text/link or the heart icon.",
-        "The footer still renders without UI glitches (no empty line with odd padding or misalignment)."
+        "Table displays all repair order fields in organized columns",
+        "Weight and cost values are formatted correctly with decimals",
+        "Dates are formatted in readable format",
+        "Edit action opens the repair order in edit mode",
+        "Table supports pagination if there are many repairs",
+        "Status fields display with appropriate visual styling"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Footer.tsx",
+          "path": "frontend/src/features/repairs/RepairOrdersView.tsx",
+          "operation": "create",
+          "description": "Create table view component following the pattern from OrdersView.tsx. Display columns for repair ID, date, material, added weight, material cost, making charge, total cost, delivery date, assigned to, status, and delivery status. Use useRecentRepairOrders hook to fetch up to 50 repair orders. Format weights and costs using formatters from frontend/src/lib/formatters.ts (divide by 100 for display). Format dates using formatTimestamp. Include edit button that calls onEditRepair callback. Add success message display for create/update operations using successPayload prop."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Create React Query hooks for repair order CRUD operations following existing order hook patterns",
+      "acceptanceCriteria": [
+        "All hooks properly convert form data to backend format",
+        "Mutations invalidate relevant queries on success",
+        "Hooks handle authorization and error states",
+        "Weight and cost conversions maintain precision (value * 100)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/repairs/usePlaceRepairOrder.ts",
+          "operation": "create",
+          "description": "Create React Query mutation hook following the pattern from usePlaceOrder.ts. Convert form data to backend format: multiply weight and cost fields by 100 to convert to BigInt storage format. Call actor.createRepairOrder with all parameters. Handle authorization errors with user-friendly messages. Invalidate 'recentRepairOrders' and 'repairOrderStats' queries on success. Return repair order ID from mutation."
+        },
+        {
+          "path": "frontend/src/features/repairs/useUpdateRepairOrder.ts",
+          "operation": "create",
+          "description": "Create React Query mutation hook following the pattern from useUpdateOrder.ts. Accept repairId and form data. Convert dates to BigInt timestamps and multiply weight/cost fields by 100. Call actor.updateRepairOrder with repairId and all parameters. Handle errors and invalidate relevant queries on success."
+        },
+        {
+          "path": "frontend/src/features/repairs/useGetRepairOrder.ts",
+          "operation": "create",
+          "description": "Create React Query hook following the pattern from useGetOrder.ts. Accept repairId parameter. Call actor.getRepairOrder(repairId). Handle authorization and not-found errors with user-friendly messages. Return repair order data for editing."
+        },
+        {
+          "path": "frontend/src/features/repairs/useRecentRepairOrders.ts",
+          "operation": "create",
+          "description": "Create React Query hook following the pattern from useRecentOrders.ts. Accept count parameter (default 50). Call actor.getRecentRepairOrders(count). Return array of repair order records for display in RepairOrdersView."
+        },
+        {
+          "path": "frontend/src/features/repairs/useRepairOrderStats.ts",
+          "operation": "create",
+          "description": "Create React Query hook following the pattern from useOrderStats.ts. Call actor.getRepairOrderStats() to fetch aggregated statistics. Return RepairOrderStats containing totalOrders, totalMaterialCost, totalMakingCharge, and totalCost for dashboard display."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add repair order statistics card to the dashboard showing counts and breakdowns",
+      "acceptanceCriteria": [
+        "Dashboard displays repair order statistics separately from regular orders",
+        "Statistics show total count and breakdown by material",
+        "Status breakdown shows on_process vs complete repairs",
+        "Statistics update when new repairs are added"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
           "operation": "modify",
-          "description": "Remove the \"Built with ... caffeine.ai\" attribution content (including the Heart icon and link) while keeping the footer container structure and spacing intact (e.g., keep a minimal centered line such as © {year} or adjust markup so there is no empty padded row/misalignment)."
+          "description": "Add a new statistics card section for repair orders below the existing order statistics. Use useRepairOrderStats hook to fetch repair statistics. Display total repair orders count, total material cost, total making charge, and total cost formatted with proper decimals. Calculate and display material breakdown by fetching recent repairs and grouping by material type. Calculate status breakdown showing counts for on_process vs complete statuses. Add navigation button to view all repair orders that sets view to 'repair'."
         }
       ]
     }

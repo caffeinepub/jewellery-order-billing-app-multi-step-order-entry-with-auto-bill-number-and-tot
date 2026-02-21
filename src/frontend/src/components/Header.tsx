@@ -3,7 +3,14 @@ import { Button } from './ui/button';
 import { Gem, LogOut, LogIn } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function Header() {
+interface HeaderProps {
+  currentView?: string;
+  onViewDashboard?: () => void;
+  onViewOrders?: () => void;
+  onViewRepairs?: () => void;
+}
+
+export default function Header({ currentView, onViewDashboard, onViewOrders, onViewRepairs }: HeaderProps) {
   const { identity, login, clear, loginStatus } = useInternetIdentity();
   const queryClient = useQueryClient();
 
@@ -64,4 +71,3 @@ export default function Header() {
     </header>
   );
 }
-

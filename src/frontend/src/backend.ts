@@ -89,18 +89,31 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface RepairOrderRecord {
+    status: string;
+    assignTo: string;
+    addedMaterialWeight: bigint;
+    date: Time;
+    deliveryDate: Time;
+    totalCost: bigint;
+    deliveryStatus: string;
+    materialCost: bigint;
+    material: string;
+    makingCharge: bigint;
+}
+export type Time = bigint;
 export interface OrderStats {
     totalOrders: bigint;
     totalNetWeight: bigint;
     totalCutWeight: bigint;
     totalGrossWeight: bigint;
 }
-export type Time = bigint;
 export interface OrderRecord {
     customerName: string;
     deliveryAddress: string;
     palletType: string;
     netWeight: bigint;
+    deliveryDate: Time;
     orderType: string;
     grossWeight: bigint;
     deliveryContact: string;
@@ -110,6 +123,12 @@ export interface OrderRecord {
     billNo: bigint;
     material: string;
     pickupLocation: string;
+}
+export interface RepairOrderStats {
+    totalMaterialCost: bigint;
+    totalOrders: bigint;
+    totalMakingCharge: bigint;
+    totalCost: bigint;
 }
 export interface UserProfile {
     name: string;
@@ -122,16 +141,21 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createRepairOrder(date: Time, material: string, addedMaterialWeight: bigint, materialCost: bigint, makingCharge: bigint, totalCost: bigint, deliveryDate: Time, assignTo: string, status: string, deliveryStatus: string): Promise<bigint>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getOrder(billNo: bigint): Promise<OrderRecord>;
     getOrderStats(): Promise<OrderStats>;
     getRecentOrders(count: bigint): Promise<Array<OrderRecord>>;
+    getRecentRepairOrders(count: bigint): Promise<Array<RepairOrderRecord>>;
+    getRepairOrder(repairId: bigint): Promise<RepairOrderRecord>;
+    getRepairOrderStats(): Promise<RepairOrderStats>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     placeOrder(customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint): Promise<bigint>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateOrder(billNo: bigint, customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint): Promise<void>;
+    updateOrder(billNo: bigint, customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint, deliveryDate: Time): Promise<void>;
+    updateRepairOrder(repairId: bigint, date: Time, material: string, addedMaterialWeight: bigint, materialCost: bigint, makingCharge: bigint, totalCost: bigint, deliveryDate: Time, assignTo: string, status: string, deliveryStatus: string): Promise<void>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -161,6 +185,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async createRepairOrder(arg0: Time, arg1: string, arg2: bigint, arg3: bigint, arg4: bigint, arg5: bigint, arg6: Time, arg7: string, arg8: string, arg9: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createRepairOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createRepairOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
             return result;
         }
     }
@@ -234,6 +272,48 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getRecentRepairOrders(arg0: bigint): Promise<Array<RepairOrderRecord>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRecentRepairOrders(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRecentRepairOrders(arg0);
+            return result;
+        }
+    }
+    async getRepairOrder(arg0: bigint): Promise<RepairOrderRecord> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRepairOrder(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRepairOrder(arg0);
+            return result;
+        }
+    }
+    async getRepairOrderStats(): Promise<RepairOrderStats> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRepairOrderStats();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRepairOrderStats();
+            return result;
+        }
+    }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -290,17 +370,31 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async updateOrder(arg0: bigint, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string, arg7: string, arg8: string, arg9: bigint, arg10: bigint, arg11: bigint): Promise<void> {
+    async updateOrder(arg0: bigint, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string, arg7: string, arg8: string, arg9: bigint, arg10: bigint, arg11: bigint, arg12: Time): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+                const result = await this.actor.updateOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+            const result = await this.actor.updateOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+            return result;
+        }
+    }
+    async updateRepairOrder(arg0: bigint, arg1: Time, arg2: string, arg3: bigint, arg4: bigint, arg5: bigint, arg6: bigint, arg7: Time, arg8: string, arg9: string, arg10: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateRepairOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateRepairOrder(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
             return result;
         }
     }

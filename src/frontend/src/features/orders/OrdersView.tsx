@@ -2,40 +2,51 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { useRecentOrders } from './useRecentOrders';
 import { formatDate, formatWeight } from '@/lib/formatters';
-import { CheckCircle2, Loader2, Edit } from 'lucide-react';
-
-interface SuccessPayload {
-  billNo: number;
-  isUpdate: boolean;
-}
+import { Loader2, Edit, CheckCircle2 } from 'lucide-react';
 
 interface OrdersViewProps {
-  successPayload: SuccessPayload | null;
   onNewOrder: () => void;
   onEditOrder: (billNo: number) => void;
+  successMessage?: { billNo: number; isUpdate: boolean } | null;
 }
 
-export default function OrdersView({ successPayload, onNewOrder, onEditOrder }: OrdersViewProps) {
-  const { data: orders, isLoading, error } = useRecentOrders(20);
+export default function OrdersView({ onNewOrder, onEditOrder, successMessage }: OrdersViewProps) {
+  const { data: orders, isLoading, error } = useRecentOrders(50);
+
+  const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return 'default';
+      case 'on process':
+        return 'secondary';
+      case 'cancelled':
+        return 'destructive';
+      case 'pending':
+      default:
+        return 'outline';
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Success Message */}
-      {successPayload && (
-        <Alert className="bg-success/10 border-success">
+      {successMessage && (
+        <Alert className="border-success bg-success/10">
           <CheckCircle2 className="h-4 w-4 text-success" />
-          <AlertDescription className="text-success">
-            Order #{successPayload.billNo} {successPayload.isUpdate ? 'updated' : 'saved'} successfully!
+          <AlertDescription>
+            Order #{successMessage.billNo} has been {successMessage.isUpdate ? 'updated' : 'saved'} successfully!
           </AlertDescription>
         </Alert>
       )}
 
       <Card className="shadow-elegant">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent Orders</CardTitle>
-          <Button onClick={onNewOrder}>New Order</Button>
+          <CardTitle>All Orders</CardTitle>
+          <Button onClick={onNewOrder}>
+            New Order
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading && (
@@ -68,9 +79,10 @@ export default function OrdersView({ successPayload, onNewOrder, onEditOrder }: 
                     <TableHead>Customer</TableHead>
                     <TableHead>Material</TableHead>
                     <TableHead>Order Type</TableHead>
+                    <TableHead>Delivery Date</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Net Wt. (gm)</TableHead>
                     <TableHead className="text-right">Gross Wt. (gm)</TableHead>
-                    <TableHead className="text-right">Cut Wt. (gm)</TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -82,9 +94,19 @@ export default function OrdersView({ successPayload, onNewOrder, onEditOrder }: 
                       <TableCell>{order.customerName}</TableCell>
                       <TableCell>{order.material}</TableCell>
                       <TableCell>{order.orderType}</TableCell>
+                      <TableCell>
+                        {order.deliveryDate && Number(order.deliveryDate) > 0 
+                          ? formatDate(order.deliveryDate)
+                          : <span className="text-muted-foreground">Not set</span>
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(order.pickupLocation || 'Pending')}>
+                          {order.pickupLocation || 'Pending'}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right">{formatWeight(order.netWeight)}</TableCell>
                       <TableCell className="text-right">{formatWeight(order.grossWeight)}</TableCell>
-                      <TableCell className="text-right">{formatWeight(order.cutWeight)}</TableCell>
                       <TableCell className="text-center">
                         <Button
                           variant="ghost"

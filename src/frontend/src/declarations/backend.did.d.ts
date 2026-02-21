@@ -15,6 +15,7 @@ export interface OrderRecord {
   'deliveryAddress' : string,
   'palletType' : string,
   'netWeight' : bigint,
+  'deliveryDate' : Time,
   'orderType' : string,
   'grossWeight' : bigint,
   'deliveryContact' : string,
@@ -31,6 +32,24 @@ export interface OrderStats {
   'totalCutWeight' : bigint,
   'totalGrossWeight' : bigint,
 }
+export interface RepairOrderRecord {
+  'status' : string,
+  'assignTo' : string,
+  'addedMaterialWeight' : bigint,
+  'date' : Time,
+  'deliveryDate' : Time,
+  'totalCost' : bigint,
+  'deliveryStatus' : string,
+  'materialCost' : bigint,
+  'material' : string,
+  'makingCharge' : bigint,
+}
+export interface RepairOrderStats {
+  'totalMaterialCost' : bigint,
+  'totalOrders' : bigint,
+  'totalMakingCharge' : bigint,
+  'totalCost' : bigint,
+}
 export type Time = bigint;
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
@@ -39,11 +58,29 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createRepairOrder' : ActorMethod<
+    [
+      Time,
+      string,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      Time,
+      string,
+      string,
+      string,
+    ],
+    bigint
+  >,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getOrder' : ActorMethod<[bigint], OrderRecord>,
   'getOrderStats' : ActorMethod<[], OrderStats>,
   'getRecentOrders' : ActorMethod<[bigint], Array<OrderRecord>>,
+  'getRecentRepairOrders' : ActorMethod<[bigint], Array<RepairOrderRecord>>,
+  'getRepairOrder' : ActorMethod<[bigint], RepairOrderRecord>,
+  'getRepairOrderStats' : ActorMethod<[], RepairOrderStats>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'placeOrder' : ActorMethod<
@@ -77,6 +114,23 @@ export interface _SERVICE {
       bigint,
       bigint,
       bigint,
+      Time,
+    ],
+    undefined
+  >,
+  'updateRepairOrder' : ActorMethod<
+    [
+      bigint,
+      Time,
+      string,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      Time,
+      string,
+      string,
+      string,
     ],
     undefined
   >,

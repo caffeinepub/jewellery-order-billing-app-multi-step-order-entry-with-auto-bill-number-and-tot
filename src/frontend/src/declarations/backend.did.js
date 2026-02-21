@@ -13,13 +13,14 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const Time = IDL.Int;
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const OrderRecord = IDL.Record({
   'customerName' : IDL.Text,
   'deliveryAddress' : IDL.Text,
   'palletType' : IDL.Text,
   'netWeight' : IDL.Nat,
+  'deliveryDate' : Time,
   'orderType' : IDL.Text,
   'grossWeight' : IDL.Nat,
   'deliveryContact' : IDL.Text,
@@ -36,15 +37,56 @@ export const OrderStats = IDL.Record({
   'totalCutWeight' : IDL.Nat,
   'totalGrossWeight' : IDL.Nat,
 });
+export const RepairOrderRecord = IDL.Record({
+  'status' : IDL.Text,
+  'assignTo' : IDL.Text,
+  'addedMaterialWeight' : IDL.Nat,
+  'date' : Time,
+  'deliveryDate' : Time,
+  'totalCost' : IDL.Nat,
+  'deliveryStatus' : IDL.Text,
+  'materialCost' : IDL.Nat,
+  'material' : IDL.Text,
+  'makingCharge' : IDL.Nat,
+});
+export const RepairOrderStats = IDL.Record({
+  'totalMaterialCost' : IDL.Nat,
+  'totalOrders' : IDL.Nat,
+  'totalMakingCharge' : IDL.Nat,
+  'totalCost' : IDL.Nat,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'createRepairOrder' : IDL.Func(
+      [
+        Time,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        Time,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+      ],
+      [IDL.Nat],
+      [],
+    ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getOrder' : IDL.Func([IDL.Nat], [OrderRecord], ['query']),
   'getOrderStats' : IDL.Func([], [OrderStats], ['query']),
   'getRecentOrders' : IDL.Func([IDL.Nat], [IDL.Vec(OrderRecord)], ['query']),
+  'getRecentRepairOrders' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Vec(RepairOrderRecord)],
+      ['query'],
+    ),
+  'getRepairOrder' : IDL.Func([IDL.Nat], [RepairOrderRecord], ['query']),
+  'getRepairOrderStats' : IDL.Func([], [RepairOrderStats], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -83,6 +125,24 @@ export const idlService = IDL.Service({
         IDL.Nat,
         IDL.Nat,
         IDL.Nat,
+        Time,
+      ],
+      [],
+      [],
+    ),
+  'updateRepairOrder' : IDL.Func(
+      [
+        IDL.Nat,
+        Time,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+        Time,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
       ],
       [],
       [],
@@ -97,13 +157,14 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const Time = IDL.Int;
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const OrderRecord = IDL.Record({
     'customerName' : IDL.Text,
     'deliveryAddress' : IDL.Text,
     'palletType' : IDL.Text,
     'netWeight' : IDL.Nat,
+    'deliveryDate' : Time,
     'orderType' : IDL.Text,
     'grossWeight' : IDL.Nat,
     'deliveryContact' : IDL.Text,
@@ -120,15 +181,56 @@ export const idlFactory = ({ IDL }) => {
     'totalCutWeight' : IDL.Nat,
     'totalGrossWeight' : IDL.Nat,
   });
+  const RepairOrderRecord = IDL.Record({
+    'status' : IDL.Text,
+    'assignTo' : IDL.Text,
+    'addedMaterialWeight' : IDL.Nat,
+    'date' : Time,
+    'deliveryDate' : Time,
+    'totalCost' : IDL.Nat,
+    'deliveryStatus' : IDL.Text,
+    'materialCost' : IDL.Nat,
+    'material' : IDL.Text,
+    'makingCharge' : IDL.Nat,
+  });
+  const RepairOrderStats = IDL.Record({
+    'totalMaterialCost' : IDL.Nat,
+    'totalOrders' : IDL.Nat,
+    'totalMakingCharge' : IDL.Nat,
+    'totalCost' : IDL.Nat,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'createRepairOrder' : IDL.Func(
+        [
+          Time,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          Time,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+        ],
+        [IDL.Nat],
+        [],
+      ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getOrder' : IDL.Func([IDL.Nat], [OrderRecord], ['query']),
     'getOrderStats' : IDL.Func([], [OrderStats], ['query']),
     'getRecentOrders' : IDL.Func([IDL.Nat], [IDL.Vec(OrderRecord)], ['query']),
+    'getRecentRepairOrders' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(RepairOrderRecord)],
+        ['query'],
+      ),
+    'getRepairOrder' : IDL.Func([IDL.Nat], [RepairOrderRecord], ['query']),
+    'getRepairOrderStats' : IDL.Func([], [RepairOrderStats], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -167,6 +269,24 @@ export const idlFactory = ({ IDL }) => {
           IDL.Nat,
           IDL.Nat,
           IDL.Nat,
+          Time,
+        ],
+        [],
+        [],
+      ),
+    'updateRepairOrder' : IDL.Func(
+        [
+          IDL.Nat,
+          Time,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+          Time,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
         ],
         [],
         [],

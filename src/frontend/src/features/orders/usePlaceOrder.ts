@@ -26,13 +26,13 @@ export function usePlaceOrder() {
           formData.orderType,
           formData.material,
           formData.item.trim(),
-          formData.phoneNo.trim(),
-          formData.deliveryDate,
-          formData.assignTo.trim(),
-          formData.remarks.trim(),
-          sanitizeNumber(formData.exchangeWt),
-          sanitizeNumber(formData.deductWt),
-          sanitizeNumber(formData.addedWt)
+          formData.remarks.trim(), // palletType field used for remarks
+          formData.status, // pickupLocation field used for status
+          formData.assignTo.trim(), // deliveryAddress field used for assignTo
+          formData.phoneNo.trim(), // deliveryContact field
+          sanitizeNumber(formData.exchangeWt), // netWeight
+          sanitizeNumber(formData.addedWt), // grossWeight
+          sanitizeNumber(formData.deductWt) // cutWeight
         );
         return Number(billNo);
       } catch (error: any) {

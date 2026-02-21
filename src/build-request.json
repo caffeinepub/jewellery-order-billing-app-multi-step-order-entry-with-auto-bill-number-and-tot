@@ -1,71 +1,165 @@
 {
   "kind": "build_request",
-  "title": "Disable weight and rate/material cost fields when Material is Other; remove footer attribution",
-  "projectName": "Jewellery Orders",
+  "title": "Add repair order management menu",
+  "projectName": "Jewelry Shop Manager",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "When the Order Wizard form field Material is set to \"Other\", disable the entire Weight step inputs (Exchange Wt, Deduct Wt, Added Wt, and Total Wt) so they are not editable.",
+      "text": "Add a new 'Repair' section to the main navigation menu that allows users to create and manage repair orders separately from regular orders",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "if material is selected as\"other\" then deactivate weight section in form."
+          "msg-latest"
         ]
       },
       "acceptanceCriteria": [
-        "In OrderWizard Step 2 (Weight), when Material = \"Other\", the inputs Exchange Wt, Deduct Wt, and Added Wt are disabled (non-interactive) and visually appear disabled (e.g., muted styling).",
-        "Total Wt remains non-editable (as it already is) and reflects a value consistent with disabled weight inputs (e.g., 0.00 if other weight fields are zeroed).",
-        "Switching Material from \"Other\" back to another material re-enables the Weight inputs according to the existing order-type-based rules."
+        "Navigation menu includes a 'Repair' option",
+        "Clicking 'Repair' navigates to the repair orders view",
+        "Repair section is accessible from the dashboard"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "When Material is set to \"Other\", disable the Amount step inputs Rate/gram (ratePerGm) and Material Cost (materialCost) so they are not editable.",
-      "target": "frontend",
+      "text": "Create a RepairOrder data type in the backend with fields: date (Nat timestamp), material (Text variant of gold/silver/other), addedMaterialWeight (Nat for grams * 100), materialCost (Nat for rupees * 100), makingCharge (Nat for rupees * 100), totalCost (Nat for rupees * 100), deliveryDate (Nat timestamp), assignTo (Text for staff assignment), status (Text variant of on_process/complete), and deliveryStatus (Text variant of pending/delivered)",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-latest"
         ],
         "quotes": [
-          "and also deactivate Rate/gram , material cost, from amount section."
+          "date",
+          "material(gold,silver,other)",
+          "added material weight",
+          "material cost",
+          "making charge",
+          "total cost",
+          "delivery date",
+          "assign to",
+          "status(on process,complete)",
+          "delivery status (pending/delivered)"
         ]
       },
       "acceptanceCriteria": [
-        "In OrderWizard Step 3 (Amount), when Material = \"Other\", Rate/gram and Material Cost inputs are disabled (non-interactive) and visually appear disabled.",
-        "When Material changes to \"Other\", Rate/gram and Material Cost values are set/kept at \"0\" so downstream calculations (e.g., Total Cost) remain consistent.",
-        "Switching Material from \"Other\" back to another material re-enables Rate/gram and continues existing auto-calculation behavior for Material Cost."
+        "RepairOrder type defined with all specified fields",
+        "Material field supports gold, silver, and other options",
+        "Status field supports on_process and complete states",
+        "Delivery status field supports pending and delivered states",
+        "Weight and cost fields use Nat type for precision (value * 100)"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Remove the \"© {year} · Built with using caffeine.ai\" attribution from the app footer while keeping the footer component layout intact (no broken spacing).",
-      "target": "frontend",
+      "text": "Implement backend CRUD functions for repair orders: createRepairOrder, updateRepairOrder, getRepairOrder, getRecentRepairOrders, and getRepairOrderStats with authorization checks similar to existing order functions",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "also remove © 2026 · Built with using\ncaffeine.ai from footer"
+          "msg-latest"
         ]
       },
       "acceptanceCriteria": [
-        "The footer no longer displays the \"Built with ... caffeine.ai\" text/link or the heart icon.",
-        "The footer still renders without UI glitches (no empty line with odd padding or misalignment)."
+        "All CRUD operations enforce authorization checks",
+        "Repair orders are stored with auto-incrementing ID",
+        "Functions return appropriate success/error results",
+        "Stats function calculates total repairs and aggregated metrics"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create a RepairWizard component with a multi-step form capturing date, material selection (gold/silver/other dropdown), added material weight input, material cost input, making charge input (with auto-calculated total cost), delivery date picker, assign to text field, status dropdown (on process/complete), and delivery status dropdown (pending/delivered)",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "date",
+          "material(gold,silver,other)",
+          "added material weight",
+          "material cost",
+          "making charge",
+          "total cost",
+          "delivery date",
+          "assign to",
+          "status(on process,complete)",
+          "delivery status (pending/delivered)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Form includes all specified fields with appropriate input types",
+        "Material dropdown offers gold, silver, and other options",
+        "Total cost auto-calculates from material cost + making charge",
+        "Date and delivery date use date picker inputs",
+        "Status dropdowns show correct options",
+        "Form validation ensures required fields are filled",
+        "Successful submission creates a new repair order"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Create a RepairOrdersView component displaying a table of all repair orders with columns for ID, date, material, added weight, costs, delivery date, assigned to, status, and delivery status, with edit and view actions for each repair order",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Table displays all repair order fields in organized columns",
+        "Weight and cost values are formatted correctly with decimals",
+        "Dates are formatted in readable format",
+        "Edit action opens the repair order in edit mode",
+        "Table supports pagination if there are many repairs",
+        "Status fields display with appropriate visual styling"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Create React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders following the same patterns as existing order hooks",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All hooks properly convert form data to backend format",
+        "Mutations invalidate relevant queries on success",
+        "Hooks handle authorization and error states",
+        "Weight and cost conversions maintain precision (value * 100)"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add a repair orders statistics card to the dashboard showing total repair orders count, total repairs by material type, and repairs by status",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard displays repair order statistics separately from regular orders",
+        "Statistics show total count and breakdown by material",
+        "Status breakdown shows on_process vs complete repairs",
+        "Statistics update when new repairs are added"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/components/ui (read-only).",
-    "Do not change backend canister interfaces or Motoko state/schema for this request."
+    "Maintain single-actor architecture in backend/main.mo",
+    "Follow existing patterns for order management CRUD operations",
+    "Use the same authorization checks as existing order functions",
+    "Preserve the existing Order type and functions without modification",
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Adding new materials or changing the MATERIALS list.",
-    "Changing how orders are stored or calculated on the backend.",
-    "Adding new authentication or permissions behavior."
+    "Integration with external repair tracking systems",
+    "SMS or email notifications for repair status changes",
+    "Photo upload for repair items",
+    "Repair history or warranty tracking",
+    "Customer communication features",
+    "Advanced reporting or analytics beyond basic statistics"
   ],
   "imageRequirements": {
     "required": [],
