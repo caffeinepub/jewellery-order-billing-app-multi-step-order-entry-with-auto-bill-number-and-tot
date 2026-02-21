@@ -4,15 +4,16 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Version 14 broke functionality that was working in version 13"
+    "Data loss issue affecting saved information",
+    "Orders cannot be saved successfully"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-validate-that-all-wizard-forms-orderwizard-repairwizard-piercingwizard-otherwizard-complete-their-workflows-without-errors",
-      "title": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
+      "id": "feature-verify-and-fix-frontend-error-handling-and-data-validation-in-the-orderwizard-to-ensure-proper-error-messages-are-shown-if-backend-operations-fail",
+      "title": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
       "reqIds": [
-        "REQ-5"
+        "REQ-4"
       ],
       "version": 1
     }
@@ -20,7 +21,7 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Restore all functionality that was working in version 13 but is now broken in version 14",
+      "summary": "Investigate and fix the root cause of data loss affecting all saved information in the backend, ensuring stable canister state persistence across upgrades",
       "reqIds": [
         "REQ-1"
       ],
@@ -28,7 +29,7 @@
     },
     {
       "id": "AR-2",
-      "summary": "Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected in the repair order form",
+      "summary": "Fix the order save functionality to ensure orders can be successfully created and persisted without errors",
       "reqIds": [
         "REQ-2"
       ],
@@ -36,22 +37,14 @@
     },
     {
       "id": "AR-3",
-      "summary": "Verify that order placement, update, and retrieval functions work correctly for all order types (orders, repair orders, piercing services, other services)",
+      "summary": "Add proper stable storage declarations for all state variables in the backend to prevent data loss during canister upgrades",
       "reqIds": [
         "REQ-3"
       ],
       "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Ensure dashboard statistics and recent records display correctly for all service types",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
     }
   ],
-  "projectName": "RepairWizard",
+  "projectName": "Fix data loss and order save failures",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

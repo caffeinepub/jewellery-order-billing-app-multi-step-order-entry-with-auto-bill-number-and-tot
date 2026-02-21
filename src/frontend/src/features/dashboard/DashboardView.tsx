@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useOrderStats } from './useOrderStats';
 import { useRecentOrders } from '../orders/useRecentOrders';
 import { useRepairOrderStats } from '../repairs/useRepairOrderStats';
@@ -12,12 +13,13 @@ import { useOtherServiceStats } from '../misc/useOtherServiceStats';
 import { useRecentPiercingServices } from '../misc/useRecentPiercingServices';
 import { useRecentOtherServices } from '../misc/useRecentOtherServices';
 import { formatDate, formatWeight } from '@/lib/formatters';
-import { Package, Scale, TrendingUp, Loader2, Edit, Wrench, Scissors, Sparkles } from 'lucide-react';
+import { Package, Scale, TrendingUp, Loader2, Edit, Wrench, Scissors, Sparkles, Plus, ChevronDown } from 'lucide-react';
 
 interface DashboardViewProps {
   onNewOrder: () => void;
   onViewOrders: () => void;
   onEditOrder: (billNo: number) => void;
+  onNewRepairOrder: () => void;
   onViewRepairs: () => void;
   onEditRepair: (repairId: number) => void;
   onEditPiercing: (serviceId: number) => void;
@@ -27,7 +29,8 @@ interface DashboardViewProps {
 export default function DashboardView({ 
   onNewOrder, 
   onViewOrders, 
-  onEditOrder, 
+  onEditOrder,
+  onNewRepairOrder,
   onViewRepairs, 
   onEditRepair,
   onEditPiercing,
@@ -63,6 +66,30 @@ export default function DashboardView({
 
   return (
     <div className="space-y-6">
+      {/* Quick Actions Menu */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="shadow-elegant">
+              <Plus className="h-4 w-4 mr-2" />
+              Create New
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={onNewOrder} className="cursor-pointer">
+              <Package className="h-4 w-4 mr-2" />
+              Create New Order
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onNewRepairOrder} className="cursor-pointer">
+              <Wrench className="h-4 w-4 mr-2" />
+              Create New Repair Order
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       {/* Order Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="shadow-elegant">
@@ -243,7 +270,153 @@ export default function DashboardView({
         </Card>
       )}
 
-      {/* Recent Piercing Services */}
+      {/* 1. Recent Orders Preview */}
+      <Card className="shadow-elegant">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Recent Orders</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={onNewOrder}>
+              <Plus className="h-4 w-4 mr-1" />
+              New Order
+            </Button>
+            <Button variant="outline" size="sm" onClick={onViewOrders}>
+              View All
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {ordersLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
+
+          {ordersError && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                Failed to load recent orders. Please try again.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {recentOrders && recentOrders.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No orders yet. Create your first order!
+            </div>
+          )}
+
+          {recentOrders && recentOrders.length > 0 && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Bill No</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Order Type</TableHead>
+                    <TableHead>Material</TableHead>
+                    <TableHead className="text-right">Net Weight</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentOrders.map((order) => (
+                    <TableRow key={Number(order.billNo)}>
+                      <TableCell className="font-medium">{Number(order.billNo)}</TableCell>
+                      <TableCell>{order.customerName}</TableCell>
+                      <TableCell>{order.orderType}</TableCell>
+                      <TableCell>{order.material}</TableCell>
+                      <TableCell className="text-right">{formatWeight(order.netWeight)} gm</TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditOrder(Number(order.billNo))}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 2. Recent Repair Orders Preview with Add New Button */}
+      <Card className="shadow-elegant">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Recent Repair Orders</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={onNewRepairOrder}>
+              <Plus className="h-4 w-4 mr-1" />
+              New Repair Order
+            </Button>
+            <Button variant="outline" size="sm" onClick={onViewRepairs}>
+              View All
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {repairsLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
+
+          {recentRepairs && recentRepairs.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No repair orders yet. Create your first repair order!
+            </div>
+          )}
+
+          {recentRepairs && recentRepairs.length > 0 && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Material</TableHead>
+                    <TableHead className="text-right">Total Cost</TableHead>
+                    <TableHead>Assigned To</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentRepairs.map((repair, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{formatDate(repair.date)}</TableCell>
+                      <TableCell>{repair.material}</TableCell>
+                      <TableCell className="text-right font-semibold">{formatCurrency(repair.totalCost)}</TableCell>
+                      <TableCell>{repair.assignTo}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(repair.status)}>
+                          {repair.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditRepair(index + 1)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 3. Recent Piercing Services */}
       {recentPiercingServices && recentPiercingServices.length > 0 && (
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -297,7 +470,7 @@ export default function DashboardView({
         </Card>
       )}
 
-      {/* Recent Other Services */}
+      {/* 4. Recent Other Services */}
       {recentOtherServices && recentOtherServices.length > 0 && (
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -348,154 +521,6 @@ export default function DashboardView({
           </CardContent>
         </Card>
       )}
-
-      {/* Recent Repair Orders Preview */}
-      {recentRepairs && recentRepairs.length > 0 && (
-        <Card className="shadow-elegant">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Repair Orders</CardTitle>
-            <Button variant="outline" size="sm" onClick={onViewRepairs}>
-              View All
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {repairsLoading && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            )}
-
-            {recentRepairs && recentRepairs.length > 0 && (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Material</TableHead>
-                      <TableHead className="text-right">Total Cost</TableHead>
-                      <TableHead>Assigned To</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentRepairs.map((repair, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{formatDate(repair.date)}</TableCell>
-                        <TableCell>{repair.material}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatCurrency(repair.totalCost)}</TableCell>
-                        <TableCell>{repair.assignTo}</TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusBadgeVariant(repair.status)}>
-                            {repair.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEditRepair(index + 1)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Recent Orders Preview */}
-      <Card className="shadow-elegant">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent Orders</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onViewOrders}>
-              View All
-            </Button>
-            <Button size="sm" onClick={onNewOrder}>
-              New Order
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {ordersLoading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            </div>
-          )}
-
-          {ordersError && (
-            <Alert variant="destructive">
-              <AlertDescription>
-                Failed to load recent orders.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {recentOrders && recentOrders.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No orders yet. Create your first order to get started.
-            </div>
-          )}
-
-          {recentOrders && recentOrders.length > 0 && (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Bill No.</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Material</TableHead>
-                    <TableHead>Delivery Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Net Wt. (gm)</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={Number(order.billNo)}>
-                      <TableCell className="font-medium">#{Number(order.billNo)}</TableCell>
-                      <TableCell>{formatDate(order.timestamp)}</TableCell>
-                      <TableCell>{order.customerName}</TableCell>
-                      <TableCell>{order.material}</TableCell>
-                      <TableCell>
-                        {order.deliveryDate && Number(order.deliveryDate) > 0 
-                          ? formatDate(order.deliveryDate)
-                          : <span className="text-muted-foreground">Not set</span>
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(order.pickupLocation || 'Pending')}>
-                          {order.pickupLocation || 'Pending'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{formatWeight(order.netWeight)}</TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditOrder(Number(order.billNo))}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

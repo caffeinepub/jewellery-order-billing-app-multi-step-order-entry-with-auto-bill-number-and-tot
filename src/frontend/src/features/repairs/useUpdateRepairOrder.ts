@@ -1,78 +1,89 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '@/hooks/useActor';
-import type { RepairFormData } from './repairTypes';
+import { useActor } from '../../hooks/useActor';
+import { sanitizeWeight, currencyToBigIntCents, dateToNanoseconds, validateBigIntRange, formatBackendError } from '../../lib/formatters';
 
 export function useUpdateRepairOrder() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ repairId, formData }: { repairId: number; formData: RepairFormData }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async (formData: {
+      repairId: bigint;
+      date: string;
+      material: string;
+      addedMaterialWeight: string;
+      materialCost: string;
+      makingCharge: string;
+      totalCost: string;
+      deliveryDate: string;
+      assignTo: string;
+      status: string;
+      deliveryStatus: string;
+    }) => {
+      if (!actor) {
+        throw new Error('Backend actor not available');
+      }
 
-      // Sanitize weight fields (store as grams, not multiplied)
-      const sanitizeWeight = (value: string): bigint => {
-        const trimmed = value.trim();
-        if (trimmed === '' || trimmed === '-') return BigInt(0);
-        const num = parseFloat(trimmed);
-        if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Store weight as grams (round to nearest gram)
-        return BigInt(Math.round(num));
-      };
+      console.log('=== Updating Repair Order ===');
+      console.log('Repair ID:', formData.repairId);
+      console.log('Form data:', formData);
 
-      // Sanitize currency fields (store as cents by multiplying by 100)
-      const sanitizeCurrency = (value: string): bigint => {
-        const trimmed = value.trim();
-        if (trimmed === '' || trimmed === '-') return BigInt(0);
-        const num = parseFloat(trimmed);
-        if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Convert to integer by multiplying by 100 (store as cents)
-        return BigInt(Math.round(num * 100));
-      };
+      // Convert and validate all fields
+      const date = dateToNanoseconds(formData.date);
+      const addedMaterialWeight = sanitizeWeight(formData.addedMaterialWeight);
+      const materialCost = currencyToBigIntCents(formData.materialCost);
+      const makingCharge = currencyToBigIntCents(formData.makingCharge);
+      const totalCost = currencyToBigIntCents(formData.totalCost);
+      const deliveryDate = dateToNanoseconds(formData.deliveryDate);
 
-      // Convert date to nanoseconds (Time format)
-      const convertDateToTime = (dateStr: string): bigint => {
-        if (!dateStr) return BigInt(0);
-        try {
-          const date = new Date(dateStr);
-          if (isNaN(date.getTime())) return BigInt(0);
-          // Convert milliseconds to nanoseconds
-          return BigInt(date.getTime()) * BigInt(1000000);
-        } catch {
-          return BigInt(0);
-        }
-      };
+      // Validate converted values
+      validateBigIntRange(date, 'date', BigInt(0), BigInt(Number.MAX_SAFE_INTEGER));
+      validateBigIntRange(addedMaterialWeight, 'addedMaterialWeight', BigInt(0), BigInt(1000000));
+      validateBigIntRange(materialCost, 'materialCost', BigInt(0), BigInt(100000000));
+      validateBigIntRange(makingCharge, 'makingCharge', BigInt(0), BigInt(100000000));
+      validateBigIntRange(totalCost, 'totalCost', BigInt(0), BigInt(100000000));
+      validateBigIntRange(deliveryDate, 'deliveryDate', BigInt(0), BigInt(Number.MAX_SAFE_INTEGER));
+
+      console.log('Converted values:', {
+        date: `${date}n`,
+        addedMaterialWeight: `${addedMaterialWeight}n`,
+        materialCost: `${materialCost}n`,
+        makingCharge: `${makingCharge}n`,
+        totalCost: `${totalCost}n`,
+        deliveryDate: `${deliveryDate}n`,
+      });
 
       try {
         await actor.updateRepairOrder(
-          BigInt(repairId),
-          convertDateToTime(formData.date),
+          formData.repairId,
+          date,
           formData.material,
-          sanitizeWeight(formData.addedMaterialWeight), // Weight field
-          sanitizeCurrency(formData.materialCost), // Currency field
-          sanitizeCurrency(formData.makingCharge), // Currency field
-          sanitizeCurrency(formData.totalCost), // Currency field
-          convertDateToTime(formData.deliveryDate),
-          formData.assignTo.trim(),
+          addedMaterialWeight,
+          materialCost,
+          makingCharge,
+          totalCost,
+          deliveryDate,
+          formData.assignTo,
           formData.status,
           formData.deliveryStatus
         );
+
+        console.log('✓ Repair order updated successfully');
       } catch (error: any) {
-        // Handle authorization errors
-        if (error.message?.includes('Unauthorized')) {
-          throw new Error('You do not have permission to update repair orders.');
-        }
-        // Handle not found errors
-        if (error.message?.includes('not found')) {
-          throw new Error('Repair order not found. It may have been deleted.');
-        }
-        throw new Error(error.message || 'Failed to update repair order. Please try again.');
+        console.error('✗ Backend error updating repair order:', error);
+        const userMessage = formatBackendError(error, 'Failed to update repair order. Please try again.');
+        throw new Error(userMessage);
       }
     },
-    onSuccess: () => {
-      // Invalidate both recent repair orders and repair order stats to refresh all views
+    onSuccess: (_, variables) => {
+      console.log('Repair order update mutation succeeded for ID:', variables.repairId);
       queryClient.invalidateQueries({ queryKey: ['recentRepairOrders'] });
       queryClient.invalidateQueries({ queryKey: ['repairOrderStats'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ['repairOrder', Number(variables.repairId)] });
+    },
+    onError: (error: any) => {
+      console.error('=== Repair Order Update Failed ===');
+      console.error('Error:', error);
+    },
   });
 }

@@ -1,45 +1,20 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-21T18:17:31.006Z",
-  "summary": "The diff implements data type migration (Nat to Int) for numeric fields and updates frontend hooks to sanitize weight/currency inputs. However, critical backend CRUD endpoints and frontend wizard components are either missing or not visible in the truncated diff, preventing verification of core requirements.",
-  "missing_requirements": [
+  "generatedAt": "2026-02-21T19:22:22.310Z",
+  "summary": "The diff implements stable storage for backend state variables and adds comprehensive frontend error handling. All four requirements (REQ-1 through REQ-4) appear to be addressed: backend variables are converted to stable storage, a migration module is added, and frontend mutation hooks now include detailed error handling with formatBackendError utility.",
+  "missing_requirements": [],
+  "hallucinated_features": [
     {
-      "id": "REQ-1",
-      "requirement": "Restore all functionality that was working in version 13 but is now broken in version 14",
-      "reason": "No evidence of restored version 13 functionality. The diff shows only data migration and frontend sanitization logic. Backend CRUD operations are truncated and incomplete, making it impossible to verify restoration of broken functionality.",
+      "description": "Migration module (backend/migration.mo) that migrates userProfiles to persistentUserProfiles",
+      "reason": "The BuildRequest does not mention creating a migration system or renaming userProfiles. This appears to be an implementation detail beyond the stated requirements of adding stable storage declarations.",
       "evidence": [
+        "backend/migration.mo",
         "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Verify that order placement, update, and retrieval functions work correctly for all order types",
-      "reason": "Backend functions are truncated at line 151 in main.mo. Cannot verify CRUD operations for repairs, piercing, and other services. The visible placeOrder and updateOrder functions exist but other service types are not shown.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Ensure dashboard statistics and recent records display correctly for all service types",
-      "reason": "No backend query functions visible for retrieving statistics or recent records. The frontend references queries like recentOrders, orderStats, recentRepairOrders, repairOrderStats, recentPiercingServices, piercingStats, recentOtherServices, otherServiceStats, but corresponding backend endpoints are not shown in the truncated diff.",
-      "evidence": [
-        "backend/main.mo",
-        "frontend/src/features/dashboard/DashboardView.tsx"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "Validate that all wizard forms complete their workflows without errors",
-      "reason": "Only usePlaceRepairOrder, useUpdateRepairOrder, usePlacePiercingService, and usePlaceOtherService hooks are shown. The actual wizard components (RepairWizard, PiercingWizard, OtherWizard) are not included in the diff, preventing verification of complete workflows.",
-      "evidence": [
-        "frontend-file-summaries.txt"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.45,
+  "confidence": 0.85,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
@@ -50,6 +25,7 @@
     "frontend/src/features/orders/useUpdateOrder.ts",
     "frontend/src/features/repairs/usePlaceRepairOrder.ts",
     "frontend/src/features/repairs/useUpdateRepairOrder.ts",
+    "frontend/src/lib/formatters.ts",
     "project_state.json"
   ]
 }

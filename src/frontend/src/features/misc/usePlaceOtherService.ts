@@ -1,45 +1,59 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '@/hooks/useActor';
-import type { OtherFormData } from './otherTypes';
+import { useActor } from '../../hooks/useActor';
+import { currencyToBigIntCents, validateBigIntRange, formatBackendError } from '../../lib/formatters';
 
 export function usePlaceOtherService() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: OtherFormData) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async (formData: {
+      name: string;
+      phone: string;
+      amount: string;
+      remarks: string;
+    }) => {
+      if (!actor) {
+        throw new Error('Backend actor not available');
+      }
 
-      // Sanitize currency fields (store as cents by multiplying by 100)
-      const sanitizeCurrency = (value: string): bigint => {
-        const trimmed = value.trim();
-        if (trimmed === '' || trimmed === '-') return BigInt(0);
-        const num = parseFloat(trimmed);
-        if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Convert to integer by multiplying by 100 (store as cents)
-        return BigInt(Math.round(num * 100));
-      };
+      console.log('=== Creating Other Service ===');
+      console.log('Form data:', formData);
+
+      // Convert and validate amount
+      const amount = currencyToBigIntCents(formData.amount);
+
+      // Validate converted value
+      validateBigIntRange(amount, 'amount', BigInt(0), BigInt(100000000));
+
+      console.log('Converted values:', {
+        amount: `${amount}n`,
+      });
 
       try {
         const serviceId = await actor.addOtherService(
-          formData.name.trim(),
-          formData.phone.trim(),
-          sanitizeCurrency(formData.amount),
-          formData.remarks.trim()
+          formData.name,
+          formData.phone,
+          amount,
+          formData.remarks
         );
-        return Number(serviceId);
+
+        console.log('✓ Other service created successfully with ID:', serviceId);
+        return serviceId;
       } catch (error: any) {
-        // Handle authorization errors
-        if (error.message?.includes('Unauthorized')) {
-          throw new Error('You do not have permission to add other services. Please log in.');
-        }
-        throw new Error(error.message || 'Failed to save other service. Please try again.');
+        console.error('✗ Backend error creating other service:', error);
+        const userMessage = formatBackendError(error, 'Failed to create other service. Please try again.');
+        throw new Error(userMessage);
       }
     },
-    onSuccess: () => {
-      // Invalidate other services cache
+    onSuccess: (serviceId) => {
+      console.log('Other service mutation succeeded, invalidating queries for ID:', serviceId);
       queryClient.invalidateQueries({ queryKey: ['recentOtherServices'] });
       queryClient.invalidateQueries({ queryKey: ['otherServiceStats'] });
-    }
+    },
+    onError: (error: any) => {
+      console.error('=== Other Service Creation Failed ===');
+      console.error('Error:', error);
+    },
   });
 }

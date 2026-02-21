@@ -10,8 +10,9 @@ import OtherWizard from './features/misc/OtherWizard';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginPrompt from './components/LoginPrompt';
-import { Gem } from 'lucide-react';
+import { Gem, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/sonner';
 
 type AppView = 'dashboard' | 'wizard' | 'orders' | 'repair' | 'repairWizard' | 'piercingWizard' | 'otherWizard';
 
@@ -30,34 +31,30 @@ interface ServiceSuccessPayload {
 }
 
 function App() {
-  const { identity } = useInternetIdentity();
+  const { identity, isInitializing } = useInternetIdentity();
   const [currentView, setCurrentView] = useState<AppView>('dashboard');
   const [successPayload, setSuccessPayload] = useState<SuccessPayload | null>(null);
   const [repairSuccessPayload, setRepairSuccessPayload] = useState<RepairSuccessPayload | null>(null);
   const [serviceSuccessPayload, setServiceSuccessPayload] = useState<ServiceSuccessPayload | null>(null);
   const [editingBillNo, setEditingBillNo] = useState<number | null>(null);
   const [editingRepairId, setEditingRepairId] = useState<number | null>(null);
-  const [editingPiercingServiceId, setEditingPiercingServiceId] = useState<number | null>(null);
-  const [editingOtherServiceId, setEditingOtherServiceId] = useState<number | null>(null);
 
   const isAuthenticated = !!identity;
 
-  const handleOrderSaved = (billNo: number, isUpdate: boolean = false) => {
-    setSuccessPayload({ billNo, isUpdate });
+  const handleOrderSaved = (billNo: bigint) => {
+    setSuccessPayload({ billNo: Number(billNo), isUpdate: !!editingBillNo });
     setEditingBillNo(null);
     setCurrentView('orders');
   };
 
-  const handleRepairSaved = (repairId: number, isUpdate: boolean = false) => {
-    setRepairSuccessPayload({ repairId, isUpdate });
+  const handleRepairSaved = (repairId: bigint) => {
+    setRepairSuccessPayload({ repairId: Number(repairId), isUpdate: !!editingRepairId });
     setEditingRepairId(null);
     setCurrentView('repair');
   };
 
-  const handleServiceSaved = (serviceId: number) => {
-    setServiceSuccessPayload({ serviceId });
-    setEditingPiercingServiceId(null);
-    setEditingOtherServiceId(null);
+  const handleServiceSaved = (serviceId: bigint) => {
+    setServiceSuccessPayload({ serviceId: Number(serviceId) });
     setCurrentView('dashboard');
   };
 
@@ -75,13 +72,11 @@ function App() {
 
   const handleNewPiercing = () => {
     setServiceSuccessPayload(null);
-    setEditingPiercingServiceId(null);
     setCurrentView('piercingWizard');
   };
 
   const handleNewOther = () => {
     setServiceSuccessPayload(null);
-    setEditingOtherServiceId(null);
     setCurrentView('otherWizard');
   };
 
@@ -95,18 +90,6 @@ function App() {
     setRepairSuccessPayload(null);
     setEditingRepairId(repairId);
     setCurrentView('repairWizard');
-  };
-
-  const handleEditPiercing = (serviceId: number) => {
-    setServiceSuccessPayload(null);
-    setEditingPiercingServiceId(serviceId);
-    setCurrentView('piercingWizard');
-  };
-
-  const handleEditOther = (serviceId: number) => {
-    setServiceSuccessPayload(null);
-    setEditingOtherServiceId(serviceId);
-    setCurrentView('otherWizard');
   };
 
   const handleViewOrders = () => {
@@ -127,10 +110,25 @@ function App() {
     setServiceSuccessPayload(null);
     setEditingBillNo(null);
     setEditingRepairId(null);
-    setEditingPiercingServiceId(null);
-    setEditingOtherServiceId(null);
     setCurrentView('dashboard');
   };
+
+  const handleCancelWizard = () => {
+    setEditingBillNo(null);
+    setEditingRepairId(null);
+    setCurrentView('dashboard');
+  };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -147,6 +145,7 @@ function App() {
           <LoginPrompt />
         </main>
         <Footer />
+        <Toaster />
       </div>
     );
   }
@@ -177,8 +176,8 @@ function App() {
                   {currentView === 'orders' && 'All Orders'}
                   {currentView === 'repair' && 'Repair Orders'}
                   {currentView === 'repairWizard' && (editingRepairId ? 'Edit Repair Order' : 'New Repair Order')}
-                  {currentView === 'piercingWizard' && (editingPiercingServiceId ? 'Edit Piercing Service' : 'New Piercing Service')}
-                  {currentView === 'otherWizard' && (editingOtherServiceId ? 'Edit Other Service' : 'New Other Service')}
+                  {currentView === 'piercingWizard' && 'New Piercing Service'}
+                  {currentView === 'otherWizard' && 'New Other Service'}
                 </h1>
                 <p className="text-muted-foreground">
                   {currentView === 'dashboard' && 'Overview of your jewellery business'}
@@ -186,8 +185,8 @@ function App() {
                   {currentView === 'orders' && 'Manage all your orders'}
                   {currentView === 'repair' && 'Manage all repair orders'}
                   {currentView === 'repairWizard' && (editingRepairId ? 'Update repair order details' : 'Create a new repair order')}
-                  {currentView === 'piercingWizard' && (editingPiercingServiceId ? 'Update piercing service details' : 'Create a new piercing service')}
-                  {currentView === 'otherWizard' && (editingOtherServiceId ? 'Update other service details' : 'Create a new other service')}
+                  {currentView === 'piercingWizard' && 'Create a new piercing service'}
+                  {currentView === 'otherWizard' && 'Create a new other service'}
                 </p>
               </div>
             </div>
@@ -205,17 +204,19 @@ function App() {
               onNewOrder={handleNewOrder}
               onViewOrders={handleViewOrders}
               onEditOrder={handleEditOrder}
+              onNewRepairOrder={handleNewRepair}
               onViewRepairs={handleViewRepairs}
               onEditRepair={handleEditRepair}
-              onEditPiercing={handleEditPiercing}
-              onEditOther={handleEditOther}
+              onEditPiercing={() => {}}
+              onEditOther={() => {}}
             />
           )}
           
           {currentView === 'wizard' && (
             <OrderWizard 
-              onOrderSaved={handleOrderSaved}
-              editingBillNo={editingBillNo}
+              onCancel={handleCancelWizard}
+              onSuccess={handleOrderSaved}
+              editBillNo={editingBillNo}
             />
           )}
           
@@ -237,26 +238,30 @@ function App() {
 
           {currentView === 'repairWizard' && (
             <RepairWizard 
-              onRepairSaved={handleRepairSaved}
-              editingRepairId={editingRepairId}
+              onCancel={handleCancelWizard}
+              onSuccess={handleRepairSaved}
+              editRepairId={editingRepairId}
             />
           )}
 
           {currentView === 'piercingWizard' && (
             <PiercingWizard 
-              onServiceSaved={handleServiceSaved}
+              onCancel={handleCancelWizard}
+              onSuccess={handleServiceSaved}
             />
           )}
 
           {currentView === 'otherWizard' && (
             <OtherWizard 
-              onServiceSaved={handleServiceSaved}
+              onCancel={handleCancelWizard}
+              onSuccess={handleServiceSaved}
             />
           )}
         </div>
       </main>
 
       <Footer />
+      <Toaster />
     </div>
   );
 }

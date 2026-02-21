@@ -1,70 +1,87 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '@/hooks/useActor';
-import type { OrderFormData } from './orderTypes';
+import { useActor } from '../../hooks/useActor';
+import { sanitizeWeight, dateToNanoseconds, validateBigIntRange, formatBackendError } from '../../lib/formatters';
 
 export function useUpdateOrder() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ billNo, formData }: { billNo: number; formData: OrderFormData }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async (formData: {
+      billNo: bigint;
+      customerName: string;
+      orderType: string;
+      material: string;
+      materialDescription: string;
+      palletType: string;
+      pickupLocation: string;
+      deliveryAddress: string;
+      deliveryContact: string;
+      netWeight: string;
+      grossWeight: string;
+      cutWeight: string;
+      deliveryDate: string;
+    }) => {
+      if (!actor) {
+        throw new Error('Backend actor not available');
+      }
 
-      // Sanitize weight fields (store as grams, not multiplied)
-      const sanitizeWeight = (value: string): bigint => {
-        const trimmed = value.trim();
-        if (trimmed === '' || trimmed === '-') return BigInt(0);
-        const num = parseFloat(trimmed);
-        if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Store weight as grams (round to nearest gram)
-        return BigInt(Math.round(num));
-      };
+      console.log('=== Updating Order ===');
+      console.log('Bill No:', formData.billNo);
+      console.log('Form data:', formData);
 
-      // Convert delivery date to nanoseconds (Time format)
-      const convertDateToTime = (dateStr: string): bigint => {
-        if (!dateStr) return BigInt(0);
-        try {
-          const date = new Date(dateStr);
-          if (isNaN(date.getTime())) return BigInt(0);
-          // Convert milliseconds to nanoseconds
-          return BigInt(date.getTime()) * BigInt(1000000);
-        } catch {
-          return BigInt(0);
-        }
-      };
+      // Sanitize and validate weight fields
+      const netWeight = sanitizeWeight(formData.netWeight);
+      const grossWeight = sanitizeWeight(formData.grossWeight);
+      const cutWeight = sanitizeWeight(formData.cutWeight);
+      const deliveryDate = dateToNanoseconds(formData.deliveryDate);
+
+      // Validate converted values
+      validateBigIntRange(netWeight, 'netWeight', BigInt(0), BigInt(1000000));
+      validateBigIntRange(grossWeight, 'grossWeight', BigInt(0), BigInt(1000000));
+      validateBigIntRange(cutWeight, 'cutWeight', BigInt(0), BigInt(1000000));
+      validateBigIntRange(deliveryDate, 'deliveryDate', BigInt(0), BigInt(Number.MAX_SAFE_INTEGER));
+
+      console.log('Converted values:', {
+        netWeight: `${netWeight}n`,
+        grossWeight: `${grossWeight}n`,
+        cutWeight: `${cutWeight}n`,
+        deliveryDate: `${deliveryDate}n`,
+      });
 
       try {
         await actor.updateOrder(
-          BigInt(billNo),
-          formData.customerName.trim(),
+          formData.billNo,
+          formData.customerName,
           formData.orderType,
           formData.material,
-          formData.item.trim(),
-          formData.remarks.trim(), // palletType field used for remarks
-          formData.status, // pickupLocation field used for status
-          formData.assignTo.trim(), // deliveryAddress field used for assignTo
-          formData.phoneNo.trim(), // deliveryContact field
-          sanitizeWeight(formData.exchangeWt), // netWeight
-          sanitizeWeight(formData.addedWt), // grossWeight
-          sanitizeWeight(formData.deductWt), // cutWeight
-          convertDateToTime(formData.deliveryDate) // deliveryDate as Time
+          formData.materialDescription,
+          formData.palletType,
+          formData.pickupLocation,
+          formData.deliveryAddress,
+          formData.deliveryContact,
+          netWeight,
+          grossWeight,
+          cutWeight,
+          deliveryDate
         );
+
+        console.log('✓ Order updated successfully');
       } catch (error: any) {
-        // Handle authorization errors
-        if (error.message?.includes('Unauthorized')) {
-          throw new Error('You do not have permission to update orders.');
-        }
-        // Handle not found errors
-        if (error.message?.includes('not found')) {
-          throw new Error('Order not found. It may have been deleted.');
-        }
-        throw new Error(error.message || 'Failed to update order. Please try again.');
+        console.error('✗ Backend error updating order:', error);
+        const userMessage = formatBackendError(error, 'Failed to update order. Please try again.');
+        throw new Error(userMessage);
       }
     },
-    onSuccess: () => {
-      // Invalidate both recent orders and order stats to refresh all views
+    onSuccess: (_, variables) => {
+      console.log('Order update mutation succeeded for bill:', variables.billNo);
       queryClient.invalidateQueries({ queryKey: ['recentOrders'] });
       queryClient.invalidateQueries({ queryKey: ['orderStats'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ['order', Number(variables.billNo)] });
+    },
+    onError: (error: any) => {
+      console.error('=== Order Update Failed ===');
+      console.error('Error:', error);
+    },
   });
 }

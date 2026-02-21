@@ -1,5 +1,5 @@
-import Map "mo:core/Map";
 import Nat "mo:core/Nat";
+import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Int "mo:core/Int";
 import Iter "mo:core/Iter";
@@ -8,39 +8,40 @@ import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import Migration "migration";
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
 (with migration = Migration.run)
 actor {
-  // authorization state is re-initialized on each upgrade
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // -- User Profiles
-  public type UserProfile = { name : Text };
-  let userProfiles = Map.empty<Principal, UserProfile>();
+  type PersistentUserProfileStore = Map.Map<Principal, UserProfile>;
+  var persistentUserProfiles : PersistentUserProfileStore = Map.empty<Principal, UserProfile>();
+
+  public type UserProfile = {
+    name : Text;
+  };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
-    userProfiles.get(caller);
+    persistentUserProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
-    userProfiles.get(user);
+    persistentUserProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
-    userProfiles.add(caller, profile);
+    persistentUserProfiles.add(caller, profile);
   };
 
   // -- Order Management
@@ -67,7 +68,7 @@ actor {
     };
   };
 
-  let orders = Map.empty<Nat, OrderRecord>();
+  var orders = Map.empty<Nat, OrderRecord>();
   var nextBillNo = 1;
 
   public shared ({ caller }) func placeOrder(
@@ -223,7 +224,7 @@ actor {
     };
   };
 
-  let repairOrders = Map.empty<Nat, RepairOrderRecord>();
+  var repairOrders = Map.empty<Nat, RepairOrderRecord>();
   var nextRepairId = 1;
 
   public shared ({ caller }) func createRepairOrder(
@@ -348,7 +349,6 @@ actor {
     };
   };
 
-  // -- Piercing and Other Services
   public type PiercingServiceRecord = {
     date : Time.Time;
     name : Text;
@@ -370,8 +370,8 @@ actor {
     remarks : Text;
   };
 
-  let piercingServices = Map.empty<Nat, PiercingServiceRecord>();
-  let otherServices = Map.empty<Nat, OtherServiceRecord>();
+  var piercingServices = Map.empty<Nat, PiercingServiceRecord>();
+  var otherServices = Map.empty<Nat, OtherServiceRecord>();
   var nextServiceId = 1;
 
   public shared ({ caller }) func addPiercingService(

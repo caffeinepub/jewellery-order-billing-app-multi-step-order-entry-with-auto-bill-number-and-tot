@@ -2,15 +2,16 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-validate-that-all-wizard-forms-orderwizard-repairwizard-piercingwizard-otherwizard-complete-their-workflows-without-errors",
-      "featureTitle": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
+      "featureId": "feature-verify-and-fix-frontend-error-handling-and-data-validation-in-the-orderwizard-to-ensure-proper-error-messages-are-shown-if-backend-operations-fail",
+      "featureTitle": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
       "files": [
         "frontend/src/features/misc/usePlaceOtherService.ts",
         "frontend/src/features/misc/usePlacePiercingService.ts",
         "frontend/src/features/orders/usePlaceOrder.ts",
         "frontend/src/features/orders/useUpdateOrder.ts",
         "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-        "frontend/src/features/repairs/useUpdateRepairOrder.ts"
+        "frontend/src/features/repairs/useUpdateRepairOrder.ts",
+        "frontend/src/lib/formatters.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -21,7 +22,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-5"
+        "REQ-4"
       ],
       "confidence": "high"
     }

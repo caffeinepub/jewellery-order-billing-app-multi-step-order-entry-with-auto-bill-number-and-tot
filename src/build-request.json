@@ -1,104 +1,87 @@
 {
   "kind": "build_request",
-  "title": "Restore version 13 functionality while preserving version 14 changes",
-  "projectName": "RepairWizard",
+  "title": "Fix data loss and order save failures",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Restore all functionality that was working in version 13 but is now broken in version 14",
-      "target": "both",
+      "text": "Investigate and fix the root cause of data loss affecting all saved information in the backend, ensuring stable canister state persistence across upgrades",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-latest"
         ],
         "quotes": [
-          "function are not working as version 13"
+          "all my data is loss"
         ]
       },
       "acceptanceCriteria": [
-        "All backend functions that worked in version 13 are operational",
-        "All frontend components that worked in version 13 are functional",
-        "User workflows from version 13 complete successfully"
+        "Existing data persists correctly across canister upgrades",
+        "No data is lost when creating new records",
+        "Backend state variables maintain their values between deployments"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected in the repair order form",
-      "target": "frontend",
+      "text": "Fix the order save functionality to ensure orders can be successfully created and persisted without errors",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-latest"
         ],
         "quotes": [
-          "keeping the recent function that had been done in version 14"
+          "i am not able to save orders"
         ]
       },
       "acceptanceCriteria": [
-        "When 'Other' material is selected, the 'Added Material Weight' field is disabled",
-        "When 'Other' material is selected, the 'Material Cost' field is disabled",
-        "The disabled fields behavior matches version 14 implementation"
+        "New orders can be created successfully through the OrderWizard",
+        "Order data is correctly stored in the backend",
+        "No errors occur during the order creation process",
+        "Saved orders appear in the recent orders list immediately after creation"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Verify that order placement, update, and retrieval functions work correctly for all order types (orders, repair orders, piercing services, other services)",
+      "text": "Add proper stable storage declarations for all state variables in the backend to prevent data loss during canister upgrades",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-latest"
         ]
       },
       "acceptanceCriteria": [
-        "Users can create new orders successfully",
-        "Users can update existing orders successfully",
-        "Users can retrieve and view order details",
-        "All CRUD operations work for repairs, piercing, and other services"
+        "All state variables (orders, repair orders, piercing services, other services, user profiles) use stable storage",
+        "Data survives canister upgrades without loss",
+        "nextBillNo counter maintains its value across upgrades"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Ensure dashboard statistics and recent records display correctly for all service types",
+      "text": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-latest"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard loads and displays statistics cards",
-        "Recent orders appear in the dashboard",
-        "Recent repair orders appear in the dashboard",
-        "Recent piercing and other services appear in the dashboard"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ]
-      },
-      "acceptanceCriteria": [
-        "OrderWizard successfully creates and edits orders",
-        "RepairWizard successfully creates and edits repair orders",
-        "PiercingWizard successfully creates piercing services",
-        "OtherWizard successfully creates other services",
-        "Form validation works correctly in all wizards"
+        "Clear error messages are displayed when order save fails",
+        "Frontend properly handles and displays backend error responses",
+        "User receives feedback about what went wrong during save operations"
       ]
     }
   ],
   "constraints": [
-    "Do not remove or modify the version 14 feature that disables material weight and cost fields when 'Other' is selected",
-    "Maintain the existing backend actor architecture with all service types",
-    "Preserve the current authentication and authorization system"
+    "Maintain single-actor architecture in backend/main.mo",
+    "Preserve existing Internet Identity authentication flow",
+    "Keep all existing UI components and routing structure intact",
+    "Do not modify read-only paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Adding new features beyond restoring version 13 functionality",
-    "Changing the UI design or styling",
-    "Modifying the data models or schema structure"
+    "Adding new features beyond fixing the save and data loss issues",
+    "Redesigning the UI or changing the visual appearance",
+    "Modifying the authentication system",
+    "Adding new service types or order fields"
   ],
   "imageRequirements": {
     "required": [],

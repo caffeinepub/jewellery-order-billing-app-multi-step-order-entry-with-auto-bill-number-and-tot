@@ -1,52 +1,79 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '@/hooks/useActor';
-import type { OrderFormData } from './orderTypes';
+import { useActor } from '../../hooks/useActor';
+import { sanitizeWeight, validateBigIntRange, formatBackendError } from '../../lib/formatters';
 
 export function usePlaceOrder() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: OrderFormData) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async (formData: {
+      customerName: string;
+      orderType: string;
+      material: string;
+      materialDescription: string;
+      palletType: string;
+      pickupLocation: string;
+      deliveryAddress: string;
+      deliveryContact: string;
+      netWeight: string;
+      grossWeight: string;
+      cutWeight: string;
+    }) => {
+      if (!actor) {
+        throw new Error('Backend actor not available');
+      }
 
-      // Sanitize weight fields (store as grams, not multiplied)
-      const sanitizeWeight = (value: string): bigint => {
-        const trimmed = value.trim();
-        if (trimmed === '' || trimmed === '-') return BigInt(0);
-        const num = parseFloat(trimmed);
-        if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Store weight as grams (round to nearest gram)
-        return BigInt(Math.round(num));
-      };
+      console.log('=== Creating Order ===');
+      console.log('Form data:', formData);
+
+      // Sanitize and validate weight fields
+      const netWeight = sanitizeWeight(formData.netWeight);
+      const grossWeight = sanitizeWeight(formData.grossWeight);
+      const cutWeight = sanitizeWeight(formData.cutWeight);
+
+      // Validate converted values
+      validateBigIntRange(netWeight, 'netWeight', BigInt(0), BigInt(1000000));
+      validateBigIntRange(grossWeight, 'grossWeight', BigInt(0), BigInt(1000000));
+      validateBigIntRange(cutWeight, 'cutWeight', BigInt(0), BigInt(1000000));
+
+      console.log('Converted weights:', {
+        netWeight: `${netWeight}n`,
+        grossWeight: `${grossWeight}n`,
+        cutWeight: `${cutWeight}n`,
+      });
 
       try {
         const billNo = await actor.placeOrder(
-          formData.customerName.trim(),
+          formData.customerName,
           formData.orderType,
           formData.material,
-          formData.item.trim(),
-          formData.remarks.trim(), // palletType field used for remarks
-          formData.status, // pickupLocation field used for status
-          formData.assignTo.trim(), // deliveryAddress field used for assignTo
-          formData.phoneNo.trim(), // deliveryContact field
-          sanitizeWeight(formData.exchangeWt), // netWeight
-          sanitizeWeight(formData.addedWt), // grossWeight
-          sanitizeWeight(formData.deductWt) // cutWeight
+          formData.materialDescription,
+          formData.palletType,
+          formData.pickupLocation,
+          formData.deliveryAddress,
+          formData.deliveryContact,
+          netWeight,
+          grossWeight,
+          cutWeight
         );
-        return Number(billNo);
+
+        console.log('✓ Order created successfully with bill number:', billNo);
+        return billNo;
       } catch (error: any) {
-        // Handle authorization errors
-        if (error.message?.includes('Unauthorized')) {
-          throw new Error('You do not have permission to create orders. Please log in.');
-        }
-        throw new Error(error.message || 'Failed to save order. Please try again.');
+        console.error('✗ Backend error creating order:', error);
+        const userMessage = formatBackendError(error, 'Failed to create order. Please try again.');
+        throw new Error(userMessage);
       }
     },
-    onSuccess: () => {
-      // Invalidate both recent orders and order stats to refresh all views
+    onSuccess: (billNo) => {
+      console.log('Order mutation succeeded, invalidating queries for bill:', billNo);
       queryClient.invalidateQueries({ queryKey: ['recentOrders'] });
       queryClient.invalidateQueries({ queryKey: ['orderStats'] });
-    }
+    },
+    onError: (error: any) => {
+      console.error('=== Order Creation Failed ===');
+      console.error('Error:', error);
+    },
   });
 }

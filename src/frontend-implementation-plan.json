@@ -1,192 +1,71 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore version 13 functionality while preserving version 14 changes",
+  "title": "Fix data loss and order save failures - Frontend error handling",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Restore all functionality that was working in version 13 but is now broken in version 14",
-      "acceptanceCriteria": [
-        "All backend functions that worked in version 13 are operational",
-        "All frontend components that worked in version 13 are functional",
-        "User workflows from version 13 complete successfully"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/orders/OrderWizard.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken order placement or update logic from version 13. Ensure form validation, weight calculations, and submission handlers work correctly. Verify the wizard completes successfully for both create and edit modes."
-        },
-        {
-          "path": "frontend/src/features/repairs/RepairWizard.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken repair order placement or update logic from version 13. Ensure form validation, cost calculations, and submission handlers work correctly. Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected. Verify the wizard completes successfully for both create and edit modes."
-        },
-        {
-          "path": "frontend/src/features/misc/PiercingWizard.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken piercing service placement logic from version 13. Ensure form validation and submission handlers work correctly. Verify the wizard completes successfully."
-        },
-        {
-          "path": "frontend/src/features/misc/OtherWizard.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken other service placement logic from version 13. Ensure form validation and submission handlers work correctly. Verify the wizard completes successfully."
-        },
-        {
-          "path": "frontend/src/features/dashboard/DashboardView.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken dashboard statistics or recent records display logic from version 13. Ensure all statistics cards and recent records tables render correctly for orders, repair orders, piercing services, and other services."
-        },
-        {
-          "path": "frontend/src/features/orders/OrdersView.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken order listing or navigation logic from version 13. Ensure the orders table displays correctly and edit/create actions work as expected."
-        },
-        {
-          "path": "frontend/src/features/repairs/RepairOrdersView.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken repair order listing or navigation logic from version 13. Ensure the repair orders table displays correctly and edit/create actions work as expected."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Review and restore any broken routing or view state management from version 13. Ensure all view transitions work correctly and edit state is properly managed for all service types."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected in the repair order form",
-      "acceptanceCriteria": [
-        "When 'Other' material is selected, the 'Added Material Weight' field is disabled",
-        "When 'Other' material is selected, the 'Material Cost' field is disabled",
-        "The disabled fields behavior matches version 14 implementation"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/repairs/RepairWizard.tsx",
-          "operation": "modify",
-          "description": "Verify and preserve the logic that disables 'Added Material Weight' and 'Material Cost' input fields when the 'Other' material option is selected. Ensure this conditional disabling is applied to the relevant form inputs in the repair order wizard and that disabled fields are visually indicated to the user."
-        }
-      ]
-    },
-    {
       "id": "REQ-4",
-      "summary": "Ensure dashboard statistics and recent records display correctly for all service types",
+      "summary": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
       "acceptanceCriteria": [
-        "Dashboard loads and displays statistics cards",
-        "Recent orders appear in the dashboard",
-        "Recent repair orders appear in the dashboard",
-        "Recent piercing and other services appear in the dashboard"
+        "Clear error messages are displayed when order save fails",
+        "Frontend properly handles and displays backend error responses",
+        "User receives feedback about what went wrong during save operations"
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/features/dashboard/DashboardView.tsx",
-          "operation": "modify",
-          "description": "Review the dashboard component to ensure all statistics cards (OrderStats, RepairOrderStats, PiercingStats, OtherServiceStats) are fetched and displayed correctly. Verify that recent records tables for all four service types (orders, repair orders, piercing services, other services) render properly with correct data formatting and navigation callbacks."
-        },
-        {
-          "path": "frontend/src/features/dashboard/useOrderStats.ts",
-          "operation": "modify",
-          "description": "Verify the order statistics hook fetches data correctly from the backend actor and handles errors appropriately."
-        },
-        {
-          "path": "frontend/src/features/repairs/useRepairOrderStats.ts",
-          "operation": "modify",
-          "description": "Verify the repair order statistics hook fetches data correctly from the backend actor and handles errors appropriately."
-        },
-        {
-          "path": "frontend/src/features/misc/usePiercingServiceStats.ts",
-          "operation": "modify",
-          "description": "Verify the piercing service statistics hook fetches data correctly from the backend actor and handles authorization errors appropriately."
-        },
-        {
-          "path": "frontend/src/features/misc/useOtherServiceStats.ts",
-          "operation": "modify",
-          "description": "Verify the other service statistics hook fetches data correctly from the backend actor and handles authorization errors appropriately."
-        },
-        {
-          "path": "frontend/src/features/orders/useRecentOrders.ts",
-          "operation": "modify",
-          "description": "Verify the recent orders hook fetches the correct number of recent orders and handles errors appropriately."
-        },
-        {
-          "path": "frontend/src/features/repairs/useRecentRepairOrders.ts",
-          "operation": "modify",
-          "description": "Verify the recent repair orders hook fetches the correct number of recent repair orders and handles errors appropriately."
-        },
-        {
-          "path": "frontend/src/features/misc/useRecentPiercingServices.ts",
-          "operation": "modify",
-          "description": "Verify the recent piercing services hook fetches the correct number of recent services with authorization error handling."
-        },
-        {
-          "path": "frontend/src/features/misc/useRecentOtherServices.ts",
-          "operation": "modify",
-          "description": "Verify the recent other services hook fetches the correct number of recent services with authorization error handling."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
-      "acceptanceCriteria": [
-        "OrderWizard successfully creates and edits orders",
-        "RepairWizard successfully creates and edits repair orders",
-        "PiercingWizard successfully creates piercing services",
-        "OtherWizard successfully creates other services",
-        "Form validation works correctly in all wizards"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/orders/OrderWizard.tsx",
-          "operation": "modify",
-          "description": "Test and validate the complete order wizard workflow for both create and edit modes. Ensure form validation triggers on invalid inputs, weight calculations work correctly based on order type, and the wizard successfully submits to the backend via usePlaceOrder or useUpdateOrder hooks. Verify error handling and success navigation."
-        },
-        {
-          "path": "frontend/src/features/repairs/RepairWizard.tsx",
-          "operation": "modify",
-          "description": "Test and validate the complete repair order wizard workflow for both create and edit modes. Ensure form validation triggers on invalid inputs, cost calculations (auto-calculating total cost from material cost and making charge) work correctly, the 'Other' material disabling logic is preserved, and the wizard successfully submits to the backend via usePlaceRepairOrder or useUpdateRepairOrder hooks. Verify error handling and success navigation."
-        },
-        {
-          "path": "frontend/src/features/misc/PiercingWizard.tsx",
-          "operation": "modify",
-          "description": "Test and validate the complete piercing service wizard workflow. Ensure form validation triggers on invalid inputs (date, name, phone, amount), and the wizard successfully submits to the backend via usePlacePiercingService hook. Verify error handling and success navigation."
-        },
-        {
-          "path": "frontend/src/features/misc/OtherWizard.tsx",
-          "operation": "modify",
-          "description": "Test and validate the complete other service wizard workflow. Ensure form validation triggers on invalid inputs (name, phone, amount), and the wizard successfully submits to the backend via usePlaceOtherService hook. Verify error handling and success navigation."
-        },
         {
           "path": "frontend/src/features/orders/usePlaceOrder.ts",
           "operation": "modify",
-          "description": "Verify the place order mutation correctly sanitizes numeric inputs to BigInt format and invalidates related queries (recent orders, order stats) on success."
+          "description": "Enhance error handling in the usePlaceOrder mutation hook to catch and properly format backend errors (including authorization traps and validation failures). Add detailed error logging and return user-friendly error messages that explain what went wrong during order creation. Ensure the mutation's onError callback receives structured error information that can be displayed in the UI."
         },
         {
           "path": "frontend/src/features/orders/useUpdateOrder.ts",
           "operation": "modify",
-          "description": "Verify the update order mutation correctly converts dates to nanoseconds, sanitizes numeric inputs, and invalidates related queries on success."
+          "description": "Enhance error handling in the useUpdateOrder mutation hook to catch and properly format backend errors. Add detailed error logging for debugging data persistence issues and return user-friendly error messages. Ensure errors related to missing orders, authorization failures, or validation issues are clearly communicated."
+        },
+        {
+          "path": "frontend/src/features/orders/OrderWizard.tsx",
+          "operation": "modify",
+          "description": "Add comprehensive error display UI in the OrderWizard component. Show toast notifications or error alerts when order save operations fail, displaying the specific error message from the mutation hooks. Add visual feedback during save operations (loading states, disable submit button). Ensure users understand why their order failed to save and what action they should take."
         },
         {
           "path": "frontend/src/features/repairs/usePlaceRepairOrder.ts",
           "operation": "modify",
-          "description": "Verify the place repair order mutation correctly converts form data to backend format (dates to nanoseconds, decimals to BigInt cents) and invalidates related queries on success."
+          "description": "Enhance error handling in the usePlaceRepairOrder mutation hook to catch and properly format backend errors. Add detailed error logging and return user-friendly error messages for repair order creation failures. Handle authorization errors and validation failures gracefully."
         },
         {
           "path": "frontend/src/features/repairs/useUpdateRepairOrder.ts",
           "operation": "modify",
-          "description": "Verify the update repair order mutation correctly converts data and invalidates related queries on success."
+          "description": "Enhance error handling in the useUpdateRepairOrder mutation hook to catch and properly format backend errors. Add detailed error logging for debugging and return user-friendly error messages that explain repair order update failures."
+        },
+        {
+          "path": "frontend/src/features/repairs/RepairWizard.tsx",
+          "operation": "modify",
+          "description": "Add comprehensive error display UI in the RepairWizard component. Show toast notifications or error alerts when repair order save operations fail, displaying specific error messages. Add loading states and visual feedback during save operations to improve user experience."
         },
         {
           "path": "frontend/src/features/misc/usePlacePiercingService.ts",
           "operation": "modify",
-          "description": "Verify the place piercing service mutation correctly converts date to nanoseconds and amount to BigInt, then invalidates the recent services cache on success."
+          "description": "Enhance error handling in the usePlacePiercingService mutation hook to catch and properly format backend errors. Add detailed error logging and return user-friendly error messages for piercing service creation failures."
+        },
+        {
+          "path": "frontend/src/features/misc/PiercingWizard.tsx",
+          "operation": "modify",
+          "description": "Add comprehensive error display UI in the PiercingWizard component. Show toast notifications or error alerts when service save operations fail. Add loading states during save operations."
         },
         {
           "path": "frontend/src/features/misc/usePlaceOtherService.ts",
           "operation": "modify",
-          "description": "Verify the place other service mutation correctly sanitizes numeric inputs to BigInt and invalidates the recent services cache on success."
+          "description": "Enhance error handling in the usePlaceOtherService mutation hook to catch and properly format backend errors. Add detailed error logging and return user-friendly error messages for other service creation failures."
+        },
+        {
+          "path": "frontend/src/features/misc/OtherWizard.tsx",
+          "operation": "modify",
+          "description": "Add comprehensive error display UI in the OtherWizard component. Show toast notifications or error alerts when service save operations fail. Add loading states during save operations."
+        },
+        {
+          "path": "frontend/src/lib/formatters.ts",
+          "operation": "modify",
+          "description": "Add utility function for formatting backend error messages into user-friendly text. Include logic to detect common error patterns (authorization failures, validation errors, data not found) and return appropriate user-facing messages. Add function to extract error details from trapped backend calls."
         }
       ]
     }

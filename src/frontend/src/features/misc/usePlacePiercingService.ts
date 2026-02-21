@@ -1,59 +1,64 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '@/hooks/useActor';
-import type { PiercingFormData } from './piercingTypes';
+import { useActor } from '../../hooks/useActor';
+import { currencyToBigIntCents, dateToNanoseconds, validateBigIntRange, formatBackendError } from '../../lib/formatters';
 
 export function usePlacePiercingService() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: PiercingFormData) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async (formData: {
+      date: string;
+      name: string;
+      phone: string;
+      amount: string;
+      remarks: string;
+    }) => {
+      if (!actor) {
+        throw new Error('Backend actor not available');
+      }
 
-      // Sanitize currency fields (store as cents by multiplying by 100)
-      const sanitizeCurrency = (value: string): bigint => {
-        const trimmed = value.trim();
-        if (trimmed === '' || trimmed === '-') return BigInt(0);
-        const num = parseFloat(trimmed);
-        if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Convert to integer by multiplying by 100 (store as cents)
-        return BigInt(Math.round(num * 100));
-      };
+      console.log('=== Creating Piercing Service ===');
+      console.log('Form data:', formData);
 
-      // Convert date to nanoseconds (Time format)
-      const convertDateToTime = (dateStr: string): bigint => {
-        if (!dateStr) return BigInt(Date.now()) * BigInt(1000000);
-        try {
-          const date = new Date(dateStr);
-          if (isNaN(date.getTime())) return BigInt(Date.now()) * BigInt(1000000);
-          // Convert milliseconds to nanoseconds
-          return BigInt(date.getTime()) * BigInt(1000000);
-        } catch {
-          return BigInt(Date.now()) * BigInt(1000000);
-        }
-      };
+      // Convert and validate fields
+      const date = dateToNanoseconds(formData.date);
+      const amount = currencyToBigIntCents(formData.amount);
+
+      // Validate converted values
+      validateBigIntRange(date, 'date', BigInt(0), BigInt(Number.MAX_SAFE_INTEGER));
+      validateBigIntRange(amount, 'amount', BigInt(0), BigInt(100000000));
+
+      console.log('Converted values:', {
+        date: `${date}n`,
+        amount: `${amount}n`,
+      });
 
       try {
         const serviceId = await actor.addPiercingService(
-          convertDateToTime(formData.date),
-          formData.name.trim(),
-          formData.phone.trim(),
-          sanitizeCurrency(formData.amount),
-          formData.remarks.trim()
+          date,
+          formData.name,
+          formData.phone,
+          amount,
+          formData.remarks
         );
-        return Number(serviceId);
+
+        console.log('✓ Piercing service created successfully with ID:', serviceId);
+        return serviceId;
       } catch (error: any) {
-        // Handle authorization errors
-        if (error.message?.includes('Unauthorized')) {
-          throw new Error('You do not have permission to add piercing services. Please log in.');
-        }
-        throw new Error(error.message || 'Failed to save piercing service. Please try again.');
+        console.error('✗ Backend error creating piercing service:', error);
+        const userMessage = formatBackendError(error, 'Failed to create piercing service. Please try again.');
+        throw new Error(userMessage);
       }
     },
-    onSuccess: () => {
-      // Invalidate piercing services cache
+    onSuccess: (serviceId) => {
+      console.log('Piercing service mutation succeeded, invalidating queries for ID:', serviceId);
       queryClient.invalidateQueries({ queryKey: ['recentPiercingServices'] });
       queryClient.invalidateQueries({ queryKey: ['piercingStats'] });
-    }
+    },
+    onError: (error: any) => {
+      console.error('=== Piercing Service Creation Failed ===');
+      console.error('Error:', error);
+    },
   });
 }
