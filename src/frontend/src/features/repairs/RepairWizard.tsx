@@ -38,6 +38,9 @@ export default function RepairWizard({ onRepairSaved, editingRepairId }: RepairW
 
   const stepLabels = ['Basic Details', 'Costs', 'Delivery & Status'];
 
+  // Determine if material-related fields should be disabled
+  const isMaterialOther = formData.material === 'Other';
+
   // Load existing repair data when editing
   useEffect(() => {
     if (isEditMode && existingRepair) {
@@ -277,6 +280,7 @@ export default function RepairWizard({ onRepairSaved, editingRepairId }: RepairW
                   value={formData.addedMaterialWeight}
                   onChange={(e) => handleInputChange('addedMaterialWeight', e.target.value)}
                   placeholder="0.00"
+                  disabled={isMaterialOther}
                   className={errors.addedMaterialWeight ? 'border-destructive' : ''}
                 />
                 {errors.addedMaterialWeight && (
@@ -293,6 +297,7 @@ export default function RepairWizard({ onRepairSaved, editingRepairId }: RepairW
                   value={formData.materialCost}
                   onChange={(e) => handleInputChange('materialCost', e.target.value)}
                   placeholder="0.00"
+                  disabled={isMaterialOther}
                   className={errors.materialCost ? 'border-destructive' : ''}
                 />
                 {errors.materialCost && (

@@ -32,6 +32,24 @@ export interface OrderStats {
   'totalCutWeight' : bigint,
   'totalGrossWeight' : bigint,
 }
+export interface OtherServiceRecord {
+  'name' : string,
+  'phone' : string,
+  'amount' : bigint,
+  'remarks' : string,
+}
+export interface OtherServiceStats {
+  'totalCount' : bigint,
+  'totalAmount' : bigint,
+}
+export interface PiercingServiceRecord {
+  'date' : Time,
+  'name' : string,
+  'phone' : string,
+  'amount' : bigint,
+  'remarks' : string,
+}
+export interface PiercingStats { 'totalCount' : bigint, 'totalAmount' : bigint }
 export interface RepairOrderRecord {
   'status' : string,
   'assignTo' : string,
@@ -57,6 +75,11 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addOtherService' : ActorMethod<[string, string, bigint, string], bigint>,
+  'addPiercingService' : ActorMethod<
+    [Time, string, string, bigint, string],
+    bigint
+  >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createRepairOrder' : ActorMethod<
     [
@@ -77,7 +100,16 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getOrder' : ActorMethod<[bigint], OrderRecord>,
   'getOrderStats' : ActorMethod<[], OrderStats>,
+  'getOtherService' : ActorMethod<[bigint], OtherServiceRecord>,
+  'getOtherServiceStats' : ActorMethod<[], OtherServiceStats>,
+  'getPiercingService' : ActorMethod<[bigint], PiercingServiceRecord>,
+  'getPiercingStats' : ActorMethod<[], PiercingStats>,
   'getRecentOrders' : ActorMethod<[bigint], Array<OrderRecord>>,
+  'getRecentOtherServices' : ActorMethod<[bigint], Array<OtherServiceRecord>>,
+  'getRecentPiercingServices' : ActorMethod<
+    [bigint],
+    Array<PiercingServiceRecord>
+  >,
   'getRecentRepairOrders' : ActorMethod<[bigint], Array<RepairOrderRecord>>,
   'getRepairOrder' : ActorMethod<[bigint], RepairOrderRecord>,
   'getRepairOrderStats' : ActorMethod<[], RepairOrderStats>,

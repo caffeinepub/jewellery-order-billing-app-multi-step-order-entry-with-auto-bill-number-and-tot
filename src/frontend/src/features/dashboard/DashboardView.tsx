@@ -7,8 +7,12 @@ import { useOrderStats } from './useOrderStats';
 import { useRecentOrders } from '../orders/useRecentOrders';
 import { useRepairOrderStats } from '../repairs/useRepairOrderStats';
 import { useRecentRepairOrders } from '../repairs/useRecentRepairOrders';
+import { usePiercingServiceStats } from '../misc/usePiercingServiceStats';
+import { useOtherServiceStats } from '../misc/useOtherServiceStats';
+import { useRecentPiercingServices } from '../misc/useRecentPiercingServices';
+import { useRecentOtherServices } from '../misc/useRecentOtherServices';
 import { formatDate, formatWeight } from '@/lib/formatters';
-import { Package, Scale, TrendingUp, Loader2, Edit, Wrench } from 'lucide-react';
+import { Package, Scale, TrendingUp, Loader2, Edit, Wrench, Scissors, Sparkles } from 'lucide-react';
 
 interface DashboardViewProps {
   onNewOrder: () => void;
@@ -16,13 +20,27 @@ interface DashboardViewProps {
   onEditOrder: (billNo: number) => void;
   onViewRepairs: () => void;
   onEditRepair: (repairId: number) => void;
+  onEditPiercing: (serviceId: number) => void;
+  onEditOther: (serviceId: number) => void;
 }
 
-export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder, onViewRepairs, onEditRepair }: DashboardViewProps) {
+export default function DashboardView({ 
+  onNewOrder, 
+  onViewOrders, 
+  onEditOrder, 
+  onViewRepairs, 
+  onEditRepair,
+  onEditPiercing,
+  onEditOther
+}: DashboardViewProps) {
   const { data: stats, isLoading: statsLoading, error: statsError } = useOrderStats();
   const { data: recentOrders, isLoading: ordersLoading, error: ordersError } = useRecentOrders(5);
   const { data: repairStats, isLoading: repairStatsLoading, error: repairStatsError } = useRepairOrderStats();
   const { data: recentRepairs, isLoading: repairsLoading } = useRecentRepairOrders(5);
+  const { data: piercingStats, isLoading: piercingStatsLoading, error: piercingStatsError } = usePiercingServiceStats();
+  const { data: otherStats, isLoading: otherStatsLoading, error: otherStatsError } = useOtherServiceStats();
+  const { data: recentPiercingServices, isLoading: piercingServicesLoading } = useRecentPiercingServices(5);
+  const { data: recentOtherServices, isLoading: otherServicesLoading } = useRecentOtherServices(5);
 
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status.toLowerCase()) {
@@ -163,6 +181,51 @@ export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder, o
         </Card>
       </div>
 
+      {/* Misc Services Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Piercing Services</CardTitle>
+            <Scissors className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {piercingStatsLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            ) : piercingStatsError ? (
+              <p className="text-sm text-destructive">Error loading</p>
+            ) : (
+              <div className="space-y-1">
+                <div className="text-2xl font-bold">{Number(piercingStats?.totalCount || 0)}</div>
+                <div className="text-sm text-muted-foreground">
+                  Total: {formatCurrency(piercingStats?.totalAmount || BigInt(0))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Other Services</CardTitle>
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {otherStatsLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            ) : otherStatsError ? (
+              <p className="text-sm text-destructive">Error loading</p>
+            ) : (
+              <div className="space-y-1">
+                <div className="text-2xl font-bold">{Number(otherStats?.totalCount || 0)}</div>
+                <div className="text-sm text-muted-foreground">
+                  Total: {formatCurrency(otherStats?.totalAmount || BigInt(0))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Material Breakdown */}
       {stats && (
         <Card className="shadow-elegant">
@@ -176,6 +239,112 @@ export default function DashboardView({ onNewOrder, onViewOrders, onEditOrder, o
                 <span className="font-semibold">{formatWeight(stats.totalCutWeight)} gm</span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Piercing Services */}
+      {recentPiercingServices && recentPiercingServices.length > 0 && (
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Piercing Services</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {piercingServicesLoading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            )}
+
+            {recentPiercingServices && recentPiercingServices.length > 0 && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Remarks</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentPiercingServices.map((service, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{formatDate(service.date)}</TableCell>
+                        <TableCell>{service.name}</TableCell>
+                        <TableCell>{service.phone}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatCurrency(service.amount)}</TableCell>
+                        <TableCell className="max-w-xs truncate">{service.remarks || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEditPiercing(index + 1)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Other Services */}
+      {recentOtherServices && recentOtherServices.length > 0 && (
+        <Card className="shadow-elegant">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Recent Other Services</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {otherServicesLoading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            )}
+
+            {recentOtherServices && recentOtherServices.length > 0 && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Remarks</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentOtherServices.map((service, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{service.name}</TableCell>
+                        <TableCell>{service.phone}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatCurrency(service.amount)}</TableCell>
+                        <TableCell className="max-w-xs truncate">{service.remarks || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEditOther(index + 1)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

@@ -10,14 +10,14 @@ export function usePlaceOrder() {
     mutationFn: async (formData: OrderFormData) => {
       if (!actor) throw new Error('Actor not available');
 
-      // Sanitize and convert numeric fields to BigInt
-      const sanitizeNumber = (value: string): bigint => {
+      // Sanitize weight fields (store as grams, not multiplied)
+      const sanitizeWeight = (value: string): bigint => {
         const trimmed = value.trim();
         if (trimmed === '' || trimmed === '-') return BigInt(0);
         const num = parseFloat(trimmed);
         if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Convert to integer by multiplying by 100 (store as cents/hundredths)
-        return BigInt(Math.round(num * 100));
+        // Store weight as grams (round to nearest gram)
+        return BigInt(Math.round(num));
       };
 
       try {
@@ -30,9 +30,9 @@ export function usePlaceOrder() {
           formData.status, // pickupLocation field used for status
           formData.assignTo.trim(), // deliveryAddress field used for assignTo
           formData.phoneNo.trim(), // deliveryContact field
-          sanitizeNumber(formData.exchangeWt), // netWeight
-          sanitizeNumber(formData.addedWt), // grossWeight
-          sanitizeNumber(formData.deductWt) // cutWeight
+          sanitizeWeight(formData.exchangeWt), // netWeight
+          sanitizeWeight(formData.addedWt), // grossWeight
+          sanitizeWeight(formData.deductWt) // cutWeight
         );
         return Number(billNo);
       } catch (error: any) {

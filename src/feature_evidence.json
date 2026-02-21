@@ -2,72 +2,14 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-repair-section-to-the-main-navigation-menu-that-allows-users-to-create-and-manage-repair-orders-separately-from-regular-orders",
-      "featureTitle": "Add a new 'Repair' section to the main navigation menu that allows users to create and manage repair orders separately from regular orders",
+      "featureId": "feature-validate-that-all-wizard-forms-orderwizard-repairwizard-piercingwizard-otherwizard-complete-their-workflows-without-errors",
+      "featureTitle": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/Header.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-a-repairwizard-component-with-a-multi-step-form-capturing-date-material-selection-gold-silver-other-dropdown-added-material-weight-input-material-cost-input-making-charge-input-with-auto-calculated-total-cost-delivery-date-picker-assign-to-text-field-status-dropdown-on-process-complete-and-delivery-status-dropdown-pending-delivered",
-      "featureTitle": "Create a RepairWizard component with a multi-step form capturing date, material selection (gold/silver/other dropdown), added material weight input, material cost input, making charge input (with auto-calculated total cost), delivery date picker, assign to text field, status dropdown (on process/complete), and delivery status dropdown (pending/delivered)",
-      "files": [
-        "frontend/src/features/repairs/RepairWizard.tsx",
-        "frontend/src/features/repairs/repairTypes.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-a-repairordersview-component-displaying-a-table-of-all-repair-orders-with-columns-for-id-date-material-added-weight-costs-delivery-date-assigned-to-status-and-delivery-status-with-edit-and-view-actions-for-each-repair-order",
-      "featureTitle": "Create a RepairOrdersView component displaying a table of all repair orders with columns for ID, date, material, added weight, costs, delivery date, assigned to, status, and delivery status, with edit and view actions for each repair order",
-      "files": [
-        "frontend/src/features/repairs/RepairOrdersView.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-react-query-hooks-for-repair-orders-useplacerepairorder-useupdaterepairorder-usegetrepairorder-and-userecentrepairorders-following-the-same-patterns-as-existing-order-hooks",
-      "featureTitle": "Create React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders following the same patterns as existing order hooks",
-      "files": [
-        "frontend/src/features/repairs/useGetRepairOrder.ts",
+        "frontend/src/features/misc/usePlaceOtherService.ts",
+        "frontend/src/features/misc/usePlacePiercingService.ts",
+        "frontend/src/features/orders/usePlaceOrder.ts",
+        "frontend/src/features/orders/useUpdateOrder.ts",
         "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-        "frontend/src/features/repairs/useRecentRepairOrders.ts",
-        "frontend/src/features/repairs/useRepairOrderStats.ts",
         "frontend/src/features/repairs/useUpdateRepairOrder.ts"
       ],
       "components": [
@@ -79,26 +21,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-repair-orders-statistics-card-to-the-dashboard-showing-total-repair-orders-count-total-repairs-by-material-type-and-repairs-by-status",
-      "featureTitle": "Add a repair orders statistics card to the dashboard showing total repair orders count, total repairs by material type, and repairs by status",
-      "files": [
-        "frontend/src/features/dashboard/DashboardView.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
+        "REQ-5"
       ],
       "confidence": "high"
     }

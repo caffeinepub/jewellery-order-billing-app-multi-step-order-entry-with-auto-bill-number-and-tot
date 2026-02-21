@@ -1,15 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add a complete repair order management system with its own navigation menu, CRUD operations, and dashboard statistics.
+**Goal:** Restore all functionality that was working in version 13 while preserving the version 14 feature that disables material weight and cost fields when 'Other' material is selected.
 
 **Planned changes:**
-- Add "Repair" section to main navigation menu
-- Create RepairOrder data type in backend with fields for date, material (gold/silver/other), added material weight, material cost, making charge, total cost, delivery date, assign to, status (on process/complete), and delivery status (pending/delivered)
-- Implement backend CRUD functions: createRepairOrder, updateRepairOrder, getRepairOrder, getRecentRepairOrders, and getRepairOrderStats with authorization checks
-- Create RepairWizard component with multi-step form for all repair order fields, including auto-calculated total cost
-- Create RepairOrdersView component displaying table of all repair orders with edit and view actions
-- Add React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders
-- Add repair orders statistics card to dashboard showing total count, breakdown by material type, and status breakdown
+- Restore backend functions for order placement, updates, and retrieval across all order types (orders, repair orders, piercing services, other services)
+- Fix frontend components to ensure dashboard statistics and recent records display correctly for all service types
+- Verify all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors
+- Preserve the version 14 behavior where 'Added Material Weight' and 'Material Cost' fields are disabled when 'Other' material is selected in the repair order form
 
-**User-visible outcome:** Users can navigate to a dedicated Repair section to create and manage repair orders separately from regular orders, view repair statistics on the dashboard, and track repair status and delivery.
+**User-visible outcome:** All features and workflows from version 13 work correctly again, including creating/updating orders, viewing dashboard data, and completing wizard forms, while maintaining the improved material field behavior from version 14.

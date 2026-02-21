@@ -89,6 +89,17 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface PiercingStats {
+    totalCount: bigint;
+    totalAmount: bigint;
+}
+export interface PiercingServiceRecord {
+    date: Time;
+    name: string;
+    phone: string;
+    amount: bigint;
+    remarks: string;
+}
 export interface RepairOrderRecord {
     status: string;
     assignTo: string;
@@ -102,6 +113,12 @@ export interface RepairOrderRecord {
     makingCharge: bigint;
 }
 export type Time = bigint;
+export interface OtherServiceRecord {
+    name: string;
+    phone: string;
+    amount: bigint;
+    remarks: string;
+}
 export interface OrderStats {
     totalOrders: bigint;
     totalNetWeight: bigint;
@@ -130,6 +147,10 @@ export interface RepairOrderStats {
     totalMakingCharge: bigint;
     totalCost: bigint;
 }
+export interface OtherServiceStats {
+    totalCount: bigint;
+    totalAmount: bigint;
+}
 export interface UserProfile {
     name: string;
 }
@@ -140,13 +161,21 @@ export enum UserRole {
 }
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    addOtherService(name: string, phone: string, amount: bigint, remarks: string): Promise<bigint>;
+    addPiercingService(date: Time, name: string, phone: string, amount: bigint, remarks: string): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createRepairOrder(date: Time, material: string, addedMaterialWeight: bigint, materialCost: bigint, makingCharge: bigint, totalCost: bigint, deliveryDate: Time, assignTo: string, status: string, deliveryStatus: string): Promise<bigint>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getOrder(billNo: bigint): Promise<OrderRecord>;
     getOrderStats(): Promise<OrderStats>;
+    getOtherService(serviceId: bigint): Promise<OtherServiceRecord>;
+    getOtherServiceStats(): Promise<OtherServiceStats>;
+    getPiercingService(serviceId: bigint): Promise<PiercingServiceRecord>;
+    getPiercingStats(): Promise<PiercingStats>;
     getRecentOrders(count: bigint): Promise<Array<OrderRecord>>;
+    getRecentOtherServices(count: bigint): Promise<Array<OtherServiceRecord>>;
+    getRecentPiercingServices(count: bigint): Promise<Array<PiercingServiceRecord>>;
     getRecentRepairOrders(count: bigint): Promise<Array<RepairOrderRecord>>;
     getRepairOrder(repairId: bigint): Promise<RepairOrderRecord>;
     getRepairOrderStats(): Promise<RepairOrderStats>;
@@ -171,6 +200,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor._initializeAccessControlWithSecret(arg0);
+            return result;
+        }
+    }
+    async addOtherService(arg0: string, arg1: string, arg2: bigint, arg3: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addOtherService(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addOtherService(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
+    async addPiercingService(arg0: Time, arg1: string, arg2: string, arg3: bigint, arg4: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addPiercingService(arg0, arg1, arg2, arg3, arg4);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addPiercingService(arg0, arg1, arg2, arg3, arg4);
             return result;
         }
     }
@@ -258,6 +315,62 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getOtherService(arg0: bigint): Promise<OtherServiceRecord> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getOtherService(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getOtherService(arg0);
+            return result;
+        }
+    }
+    async getOtherServiceStats(): Promise<OtherServiceStats> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getOtherServiceStats();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getOtherServiceStats();
+            return result;
+        }
+    }
+    async getPiercingService(arg0: bigint): Promise<PiercingServiceRecord> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getPiercingService(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPiercingService(arg0);
+            return result;
+        }
+    }
+    async getPiercingStats(): Promise<PiercingStats> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getPiercingStats();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPiercingStats();
+            return result;
+        }
+    }
     async getRecentOrders(arg0: bigint): Promise<Array<OrderRecord>> {
         if (this.processError) {
             try {
@@ -269,6 +382,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getRecentOrders(arg0);
+            return result;
+        }
+    }
+    async getRecentOtherServices(arg0: bigint): Promise<Array<OtherServiceRecord>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRecentOtherServices(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRecentOtherServices(arg0);
+            return result;
+        }
+    }
+    async getRecentPiercingServices(arg0: bigint): Promise<Array<PiercingServiceRecord>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRecentPiercingServices(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRecentPiercingServices(arg0);
             return result;
         }
     }

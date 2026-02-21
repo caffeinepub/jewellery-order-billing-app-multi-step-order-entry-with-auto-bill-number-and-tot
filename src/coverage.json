@@ -1,94 +1,87 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-21T17:19:13.186Z",
+  "generatedAt": "2026-02-21T18:17:31.009Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 5,
+    "total": 5,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a new 'Repair' section to the main navigation menu that allows users to create and manage repair orders separately from regular orders",
-        "status": "implemented",
+        "summary": "Restore all functionality that was working in version 13 but is now broken in version 14",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/Header.tsx"
+          "frontend/src/features/orders/OrderWizard.tsx",
+          "frontend/src/features/repairs/RepairWizard.tsx",
+          "frontend/src/features/misc/PiercingWizard.tsx",
+          "frontend/src/features/misc/OtherWizard.tsx",
+          "frontend/src/features/dashboard/DashboardView.tsx",
+          "frontend/src/features/orders/OrdersView.tsx",
+          "frontend/src/features/repairs/RepairOrdersView.tsx",
+          "frontend/src/App.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/Header.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Create a RepairOrder data type in the backend with fields: date (Nat timestamp), material (Text variant of gold/silver/other), addedMaterialWeight (Nat for grams * 100), materialCost (Nat for rupees * 100), makingCharge (Nat for rupees * 100), totalCost (Nat for rupees * 100), deliveryDate (Nat timestamp), assignTo (Text for staff assignment), status (Text variant of on_process/complete), and deliveryStatus (Text variant of pending/delivered)",
-        "status": "unknown",
-        "plannedFiles": [],
+        "summary": "Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected in the repair order form",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/features/repairs/RepairWizard.tsx"
+        ],
         "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Implement backend CRUD functions for repair orders: createRepairOrder, updateRepairOrder, getRepairOrder, getRecentRepairOrders, and getRepairOrderStats with authorization checks similar to existing order functions",
+        "summary": "Verify that order placement, update, and retrieval functions work correctly for all order types (orders, repair orders, piercing services, other services)",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-4",
-        "summary": "Create a RepairWizard component with a multi-step form capturing date, material selection (gold/silver/other dropdown), added material weight input, material cost input, making charge input (with auto-calculated total cost), delivery date picker, assign to text field, status dropdown (on process/complete), and delivery status dropdown (pending/delivered)",
-        "status": "implemented",
+        "summary": "Ensure dashboard statistics and recent records display correctly for all service types",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/features/repairs/repairTypes.ts",
-          "frontend/src/features/repairs/RepairWizard.tsx"
+          "frontend/src/features/dashboard/DashboardView.tsx",
+          "frontend/src/features/dashboard/useOrderStats.ts",
+          "frontend/src/features/repairs/useRepairOrderStats.ts",
+          "frontend/src/features/misc/usePiercingServiceStats.ts",
+          "frontend/src/features/misc/useOtherServiceStats.ts",
+          "frontend/src/features/orders/useRecentOrders.ts",
+          "frontend/src/features/repairs/useRecentRepairOrders.ts",
+          "frontend/src/features/misc/useRecentPiercingServices.ts",
+          "frontend/src/features/misc/useRecentOtherServices.ts"
         ],
-        "matchedFiles": [
-          "frontend/src/features/repairs/repairTypes.ts",
-          "frontend/src/features/repairs/RepairWizard.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-5",
-        "summary": "Create a RepairOrdersView component displaying a table of all repair orders with columns for ID, date, material, added weight, costs, delivery date, assigned to, status, and delivery status, with edit and view actions for each repair order",
+        "summary": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/repairs/RepairOrdersView.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/repairs/RepairOrdersView.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Create React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders following the same patterns as existing order hooks",
-        "status": "implemented",
-        "plannedFiles": [
+          "frontend/src/features/orders/OrderWizard.tsx",
+          "frontend/src/features/repairs/RepairWizard.tsx",
+          "frontend/src/features/misc/PiercingWizard.tsx",
+          "frontend/src/features/misc/OtherWizard.tsx",
+          "frontend/src/features/orders/usePlaceOrder.ts",
+          "frontend/src/features/orders/useUpdateOrder.ts",
           "frontend/src/features/repairs/usePlaceRepairOrder.ts",
           "frontend/src/features/repairs/useUpdateRepairOrder.ts",
-          "frontend/src/features/repairs/useGetRepairOrder.ts",
-          "frontend/src/features/repairs/useRecentRepairOrders.ts",
-          "frontend/src/features/repairs/useRepairOrderStats.ts"
+          "frontend/src/features/misc/usePlacePiercingService.ts",
+          "frontend/src/features/misc/usePlaceOtherService.ts"
         ],
         "matchedFiles": [
+          "frontend/src/features/orders/usePlaceOrder.ts",
+          "frontend/src/features/orders/useUpdateOrder.ts",
           "frontend/src/features/repairs/usePlaceRepairOrder.ts",
           "frontend/src/features/repairs/useUpdateRepairOrder.ts",
-          "frontend/src/features/repairs/useGetRepairOrder.ts",
-          "frontend/src/features/repairs/useRecentRepairOrders.ts",
-          "frontend/src/features/repairs/useRepairOrderStats.ts"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Add a repair orders statistics card to the dashboard showing total repair orders count, total repairs by material type, and repairs by status",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/dashboard/DashboardView.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/dashboard/DashboardView.tsx"
+          "frontend/src/features/misc/usePlacePiercingService.ts",
+          "frontend/src/features/misc/usePlaceOtherService.ts"
         ]
       }
     ]
@@ -100,20 +93,12 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/features/dashboard/DashboardView.tsx",
-    "frontend/src/features/repairs/RepairOrdersView.tsx",
-    "frontend/src/features/repairs/RepairWizard.tsx",
-    "frontend/src/features/repairs/repairTypes.ts",
-    "frontend/src/features/repairs/useGetRepairOrder.ts",
+    "frontend/src/features/misc/usePlaceOtherService.ts",
+    "frontend/src/features/misc/usePlacePiercingService.ts",
+    "frontend/src/features/orders/usePlaceOrder.ts",
+    "frontend/src/features/orders/useUpdateOrder.ts",
     "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-    "frontend/src/features/repairs/useRecentRepairOrders.ts",
-    "frontend/src/features/repairs/useRepairOrderStats.ts",
     "frontend/src/features/repairs/useUpdateRepairOrder.ts",
     "project_state.json",
     "scratch/component-selection.json",

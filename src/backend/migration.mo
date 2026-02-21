@@ -1,10 +1,13 @@
+import Int "mo:core/Int";
+import Text "mo:core/Text";
+import Iter "mo:core/Iter";
 import Map "mo:core/Map";
-import Principal "mo:core/Principal";
+import Nat "mo:core/Nat";
 import Time "mo:core/Time";
 
 module {
-  type UserProfiles = Map.Map<Principal, { name : Text }>;
-  type Orders = Map.Map<Nat, {
+  // Old type definitions
+  type OldOrderRecord = {
     billNo : Nat;
     timestamp : Time.Time;
     customerName : Text;
@@ -19,9 +22,9 @@ module {
     grossWeight : Nat;
     cutWeight : Nat;
     deliveryDate : Time.Time;
-  }>;
+  };
 
-  type RepairOrderRecord = {
+  type OldRepairOrderRecord = {
     date : Time.Time;
     material : Text;
     addedMaterialWeight : Nat;
@@ -33,27 +36,112 @@ module {
     status : Text;
     deliveryStatus : Text;
   };
-  type RepairOrders = Map.Map<Nat, RepairOrderRecord>;
+
+  type OldPiercingServiceRecord = {
+    date : Time.Time;
+    name : Text;
+    phone : Text;
+    amount : Nat;
+    remarks : Text;
+  };
+
+  type OldOtherServiceRecord = {
+    name : Text;
+    phone : Text;
+    amount : Nat;
+    remarks : Text;
+  };
 
   type OldActor = {
-    userProfiles : UserProfiles;
-    orders : Orders;
-    nextBillNo : Nat;
+    orders : Map.Map<Nat, OldOrderRecord>;
+    repairOrders : Map.Map<Nat, OldRepairOrderRecord>;
+    piercingServices : Map.Map<Nat, OldPiercingServiceRecord>;
+    otherServices : Map.Map<Nat, OldOtherServiceRecord>;
+  };
+
+  // New type definitions (all required fields)
+  type NewOrderRecord = {
+    billNo : Nat;
+    timestamp : Time.Time;
+    customerName : Text;
+    orderType : Text;
+    material : Text;
+    materialDescription : Text;
+    palletType : Text;
+    pickupLocation : Text;
+    deliveryAddress : Text;
+    deliveryContact : Text;
+    netWeight : Int;
+    grossWeight : Int;
+    cutWeight : Int;
+    deliveryDate : Time.Time;
+  };
+
+  type NewRepairOrderRecord = {
+    date : Time.Time;
+    material : Text;
+    addedMaterialWeight : Int;
+    materialCost : Int;
+    makingCharge : Int;
+    totalCost : Int;
+    deliveryDate : Time.Time;
+    assignTo : Text;
+    status : Text;
+    deliveryStatus : Text;
+  };
+
+  type NewPiercingServiceRecord = {
+    date : Time.Time;
+    name : Text;
+    phone : Text;
+    amount : Int;
+    remarks : Text;
+  };
+
+  type NewOtherServiceRecord = {
+    name : Text;
+    phone : Text;
+    amount : Int;
+    remarks : Text;
   };
 
   type NewActor = {
-    userProfiles : UserProfiles;
-    orders : Orders;
-    nextBillNo : Nat;
-    repairOrders : RepairOrders;
-    nextRepairId : Nat;
+    orders : Map.Map<Nat, NewOrderRecord>;
+    repairOrders : Map.Map<Nat, NewRepairOrderRecord>;
+    piercingServices : Map.Map<Nat, NewPiercingServiceRecord>;
+    otherServices : Map.Map<Nat, NewOtherServiceRecord>;
   };
 
   public func run(old : OldActor) : NewActor {
+    let newOrders = old.orders.map<Nat, OldOrderRecord, NewOrderRecord>(
+      func(_id, record) {
+        { record with netWeight = record.netWeight.toInt(); grossWeight = record.grossWeight.toInt(); cutWeight = record.cutWeight.toInt() };
+      }
+    );
+
+    let newRepairOrders = old.repairOrders.map<Nat, OldRepairOrderRecord, NewRepairOrderRecord>(
+      func(_id, record) {
+        { record with addedMaterialWeight = record.addedMaterialWeight.toInt(); materialCost = record.materialCost.toInt(); makingCharge = record.makingCharge.toInt(); totalCost = record.totalCost.toInt() };
+      }
+    );
+
+    let newPiercingServices = old.piercingServices.map<Nat, OldPiercingServiceRecord, NewPiercingServiceRecord>(
+      func(_id, record) {
+        { record with amount = record.amount.toInt() };
+      }
+    );
+
+    let newOtherServices = old.otherServices.map<Nat, OldOtherServiceRecord, NewOtherServiceRecord>(
+      func(_id, record) {
+        { record with amount = record.amount.toInt() };
+      }
+    );
+
     {
-      old with
-      repairOrders = Map.empty<Nat, RepairOrderRecord>();
-      nextRepairId = 1;
+      orders = newOrders;
+      repairOrders = newRepairOrders;
+      piercingServices = newPiercingServices;
+      otherServices = newOtherServices;
     };
   };
 };

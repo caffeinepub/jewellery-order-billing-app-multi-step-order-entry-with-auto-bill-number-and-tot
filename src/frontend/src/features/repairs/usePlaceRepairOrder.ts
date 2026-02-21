@@ -10,13 +10,23 @@ export function usePlaceRepairOrder() {
     mutationFn: async (formData: RepairFormData) => {
       if (!actor) throw new Error('Actor not available');
 
-      // Sanitize and convert numeric fields to BigInt
-      const sanitizeNumber = (value: string): bigint => {
+      // Sanitize weight fields (store as grams, not multiplied)
+      const sanitizeWeight = (value: string): bigint => {
         const trimmed = value.trim();
         if (trimmed === '' || trimmed === '-') return BigInt(0);
         const num = parseFloat(trimmed);
         if (isNaN(num) || !isFinite(num)) return BigInt(0);
-        // Convert to integer by multiplying by 100 (store as cents/hundredths)
+        // Store weight as grams (round to nearest gram)
+        return BigInt(Math.round(num));
+      };
+
+      // Sanitize currency fields (store as cents by multiplying by 100)
+      const sanitizeCurrency = (value: string): bigint => {
+        const trimmed = value.trim();
+        if (trimmed === '' || trimmed === '-') return BigInt(0);
+        const num = parseFloat(trimmed);
+        if (isNaN(num) || !isFinite(num)) return BigInt(0);
+        // Convert to integer by multiplying by 100 (store as cents)
         return BigInt(Math.round(num * 100));
       };
 
@@ -37,10 +47,10 @@ export function usePlaceRepairOrder() {
         const repairId = await actor.createRepairOrder(
           convertDateToTime(formData.date),
           formData.material,
-          sanitizeNumber(formData.addedMaterialWeight),
-          sanitizeNumber(formData.materialCost),
-          sanitizeNumber(formData.makingCharge),
-          sanitizeNumber(formData.totalCost),
+          sanitizeWeight(formData.addedMaterialWeight), // Weight field
+          sanitizeCurrency(formData.materialCost), // Currency field
+          sanitizeCurrency(formData.makingCharge), // Currency field
+          sanitizeCurrency(formData.totalCost), // Currency field
           convertDateToTime(formData.deliveryDate),
           formData.assignTo.trim(),
           formData.status,

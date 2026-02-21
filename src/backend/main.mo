@@ -1,30 +1,29 @@
 import Map "mo:core/Map";
-import Text "mo:core/Text";
 import Nat "mo:core/Nat";
-import Order "mo:core/Order";
-import Iter "mo:core/Iter";
-import Runtime "mo:core/Runtime";
-import Time "mo:core/Time";
+import Text "mo:core/Text";
 import Int "mo:core/Int";
+import Iter "mo:core/Iter";
+import Order "mo:core/Order";
+import Time "mo:core/Time";
+import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import Migration "migration";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-// Apply state migration on upgrade
 (with migration = Migration.run)
 actor {
+  // authorization state is re-initialized on each upgrade
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  public type UserProfile = {
-    name : Text;
-  };
-
+  // -- User Profiles
+  public type UserProfile = { name : Text };
   let userProfiles = Map.empty<Principal, UserProfile>();
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can view profiles");
     };
     userProfiles.get(caller);
@@ -38,12 +37,13 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
   };
 
+  // -- Order Management
   type OrderRecord = {
     billNo : Nat;
     timestamp : Time.Time;
@@ -55,9 +55,9 @@ actor {
     pickupLocation : Text;
     deliveryAddress : Text;
     deliveryContact : Text;
-    netWeight : Nat;
-    grossWeight : Nat;
-    cutWeight : Nat;
+    netWeight : Int;
+    grossWeight : Int;
+    cutWeight : Int;
     deliveryDate : Time.Time;
   };
 
@@ -79,11 +79,11 @@ actor {
     pickupLocation : Text,
     deliveryAddress : Text,
     deliveryContact : Text,
-    netWeight : Nat,
-    grossWeight : Nat,
-    cutWeight : Nat,
+    netWeight : Int,
+    grossWeight : Int,
+    cutWeight : Int,
   ) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can place orders");
     };
 
@@ -121,12 +121,12 @@ actor {
     pickupLocation : Text,
     deliveryAddress : Text,
     deliveryContact : Text,
-    netWeight : Nat,
-    grossWeight : Nat,
-    cutWeight : Nat,
+    netWeight : Int,
+    grossWeight : Int,
+    cutWeight : Int,
     deliveryDate : Time.Time,
   ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can update orders");
     };
 
@@ -155,7 +155,7 @@ actor {
   };
 
   public query ({ caller }) func getOrder(billNo : Nat) : async OrderRecord {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can view orders");
     };
 
@@ -166,7 +166,7 @@ actor {
   };
 
   public query ({ caller }) func getRecentOrders(count : Nat) : async [OrderRecord] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can view orders");
     };
 
@@ -181,18 +181,18 @@ actor {
   };
 
   public query ({ caller }) func getOrderStats() : async OrderStats {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can get order stats");
     };
 
-    var totalNetWeight = 0;
-    var totalGrossWeight = 0;
-    var totalCutWeight = 0;
+    var totalNetWeight : Nat = 0;
+    var totalGrossWeight : Nat = 0;
+    var totalCutWeight : Nat = 0;
 
     for (order in orders.values()) {
-      totalNetWeight += order.netWeight;
-      totalGrossWeight += order.grossWeight;
-      totalCutWeight += order.cutWeight;
+      totalNetWeight += order.netWeight.toNat();
+      totalGrossWeight += order.grossWeight.toNat();
+      totalCutWeight += order.cutWeight.toNat();
     };
 
     {
@@ -203,14 +203,14 @@ actor {
     };
   };
 
-  // New RepairOrder type and related functionality
+  // -- Repair Orders
   type RepairOrderRecord = {
     date : Time.Time;
     material : Text;
-    addedMaterialWeight : Nat;
-    materialCost : Nat;
-    makingCharge : Nat;
-    totalCost : Nat;
+    addedMaterialWeight : Int;
+    materialCost : Int;
+    makingCharge : Int;
+    totalCost : Int;
     deliveryDate : Time.Time;
     assignTo : Text;
     status : Text;
@@ -229,16 +229,16 @@ actor {
   public shared ({ caller }) func createRepairOrder(
     date : Time.Time,
     material : Text,
-    addedMaterialWeight : Nat,
-    materialCost : Nat,
-    makingCharge : Nat,
-    totalCost : Nat,
+    addedMaterialWeight : Int,
+    materialCost : Int,
+    makingCharge : Int,
+    totalCost : Int,
     deliveryDate : Time.Time,
     assignTo : Text,
     status : Text,
     deliveryStatus : Text,
   ) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can create repair orders");
     };
 
@@ -266,16 +266,16 @@ actor {
     repairId : Nat,
     date : Time.Time,
     material : Text,
-    addedMaterialWeight : Nat,
-    materialCost : Nat,
-    makingCharge : Nat,
-    totalCost : Nat,
+    addedMaterialWeight : Int,
+    materialCost : Int,
+    makingCharge : Int,
+    totalCost : Int,
     deliveryDate : Time.Time,
     assignTo : Text,
     status : Text,
     deliveryStatus : Text,
   ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can update repair orders");
     };
 
@@ -300,7 +300,7 @@ actor {
   };
 
   public query ({ caller }) func getRepairOrder(repairId : Nat) : async RepairOrderRecord {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can view repair orders");
     };
 
@@ -311,7 +311,7 @@ actor {
   };
 
   public query ({ caller }) func getRecentRepairOrders(count : Nat) : async [RepairOrderRecord] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can view repair orders");
     };
 
@@ -326,18 +326,18 @@ actor {
   };
 
   public query ({ caller }) func getRepairOrderStats() : async RepairOrderStats {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can get repair order stats");
     };
 
-    var totalMaterialCost = 0;
-    var totalMakingCharge = 0;
-    var totalCost = 0;
+    var totalMaterialCost : Nat = 0;
+    var totalMakingCharge : Nat = 0;
+    var totalCost : Nat = 0;
 
     for (repairOrder in repairOrders.values()) {
-      totalMaterialCost += repairOrder.materialCost;
-      totalMakingCharge += repairOrder.makingCharge;
-      totalCost += repairOrder.totalCost;
+      totalMaterialCost += repairOrder.materialCost.toNat();
+      totalMakingCharge += repairOrder.makingCharge.toNat();
+      totalCost += repairOrder.totalCost.toNat();
     };
 
     {
@@ -346,5 +346,161 @@ actor {
       totalMakingCharge;
       totalCost;
     };
+  };
+
+  // -- Piercing and Other Services
+  public type PiercingServiceRecord = {
+    date : Time.Time;
+    name : Text;
+    phone : Text;
+    amount : Int;
+    remarks : Text;
+  };
+
+  module PiercingServiceRecord {
+    public func compare(a : PiercingServiceRecord, b : PiercingServiceRecord) : Order.Order {
+      Int.compare(b.date, a.date);
+    };
+  };
+
+  public type OtherServiceRecord = {
+    name : Text;
+    phone : Text;
+    amount : Int;
+    remarks : Text;
+  };
+
+  let piercingServices = Map.empty<Nat, PiercingServiceRecord>();
+  let otherServices = Map.empty<Nat, OtherServiceRecord>();
+  var nextServiceId = 1;
+
+  public shared ({ caller }) func addPiercingService(
+    date : Time.Time,
+    name : Text,
+    phone : Text,
+    amount : Int,
+    remarks : Text,
+  ) : async Nat {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can add services");
+    };
+
+    let serviceId = nextServiceId;
+    nextServiceId += 1;
+
+    let service : PiercingServiceRecord = {
+      date;
+      name;
+      phone;
+      amount;
+      remarks;
+    };
+
+    piercingServices.add(serviceId, service);
+    serviceId;
+  };
+
+  public query ({ caller }) func getPiercingService(serviceId : Nat) : async PiercingServiceRecord {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view services");
+    };
+
+    switch (piercingServices.get(serviceId)) {
+      case (null) { Runtime.trap("Service not found") };
+      case (?service) { service };
+    };
+  };
+
+  public query ({ caller }) func getRecentPiercingServices(count : Nat) : async [PiercingServiceRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view services");
+    };
+
+    piercingServices.values().toArray().sort().sliceToArray(0, count);
+  };
+
+  public type PiercingStats = {
+    totalCount : Nat;
+    totalAmount : Nat;
+  };
+
+  public query ({ caller }) func getPiercingStats() : async PiercingStats {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can get piercing stats");
+    };
+
+    var totalCount = 0;
+    var totalAmount : Nat = 0;
+
+    for (service in piercingServices.values()) {
+      totalCount += 1;
+      totalAmount += service.amount.toNat();
+    };
+
+    { totalCount; totalAmount };
+  };
+
+  public shared ({ caller }) func addOtherService(
+    name : Text,
+    phone : Text,
+    amount : Int,
+    remarks : Text,
+  ) : async Nat {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can add services");
+    };
+
+    let serviceId = nextServiceId;
+    nextServiceId += 1;
+
+    let service : OtherServiceRecord = {
+      name;
+      phone;
+      amount;
+      remarks;
+    };
+
+    otherServices.add(serviceId, service);
+    serviceId;
+  };
+
+  public query ({ caller }) func getOtherService(serviceId : Nat) : async OtherServiceRecord {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view services");
+    };
+
+    switch (otherServices.get(serviceId)) {
+      case (null) { Runtime.trap("Service not found") };
+      case (?service) { service };
+    };
+  };
+
+  public query ({ caller }) func getRecentOtherServices(count : Nat) : async [OtherServiceRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view services");
+    };
+
+    otherServices.values().toArray().sliceToArray(0, count);
+  };
+
+  public type OtherServiceStats = {
+    totalCount : Nat;
+    totalAmount : Nat;
+  };
+
+  public query ({ caller }) func getOtherServiceStats() : async OtherServiceStats {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can get other service stats");
+    };
+
+    var totalCount = 0;
+    var totalAmount : Nat = 0;
+
+    for (service in otherServices.values()) {
+      totalCount += 1;
+      totalAmount += service.amount.toNat();
+    };
+
+    { totalCount; totalAmount };
   };
 };

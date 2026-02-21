@@ -1,16 +1,31 @@
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Button } from './ui/button';
-import { Gem, LogOut, LogIn } from 'lucide-react';
+import { Gem, LogOut, LogIn, ChevronDown } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 interface HeaderProps {
   currentView?: string;
   onViewDashboard?: () => void;
   onViewOrders?: () => void;
   onViewRepairs?: () => void;
+  onNewPiercing?: () => void;
+  onNewOther?: () => void;
 }
 
-export default function Header({ currentView, onViewDashboard, onViewOrders, onViewRepairs }: HeaderProps) {
+export default function Header({ 
+  currentView, 
+  onViewDashboard, 
+  onViewOrders, 
+  onViewRepairs,
+  onNewPiercing,
+  onNewOther
+}: HeaderProps) {
   const { identity, login, clear, loginStatus } = useInternetIdentity();
   const queryClient = useQueryClient();
 
@@ -44,6 +59,25 @@ export default function Header({ currentView, onViewDashboard, onViewOrders, onV
           </div>
           
           <div className="flex items-center gap-4">
+            {isAuthenticated && onNewPiercing && onNewOther && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    Misc
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onNewPiercing}>
+                    Piercing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onNewOther}>
+                    Other
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
             <Button
               onClick={handleAuth}
               disabled={isLoggingIn}

@@ -1,124 +1,192 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add repair order management menu",
+  "title": "Restore version 13 functionality while preserving version 14 changes",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add 'Repair' navigation option to main menu and wire repair orders view into the application router",
+      "summary": "Restore all functionality that was working in version 13 but is now broken in version 14",
       "acceptanceCriteria": [
-        "Navigation menu includes a 'Repair' option",
-        "Clicking 'Repair' navigates to the repair orders view",
-        "Repair section is accessible from the dashboard"
+        "All backend functions that worked in version 13 are operational",
+        "All frontend components that worked in version 13 are functional",
+        "User workflows from version 13 complete successfully"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/features/orders/OrderWizard.tsx",
           "operation": "modify",
-          "description": "Add 'repair' view state option to the existing view routing logic. Add state management for repair order editing (editingRepairId) similar to editingBillNo. Include routing logic to display RepairOrdersView and RepairWizard components based on view state."
+          "description": "Review and restore any broken order placement or update logic from version 13. Ensure form validation, weight calculations, and submission handlers work correctly. Verify the wizard completes successfully for both create and edit modes."
         },
         {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/features/repairs/RepairWizard.tsx",
           "operation": "modify",
-          "description": "Add a 'Repair' navigation button alongside existing Dashboard/Orders navigation. Wire the button to set view to 'repair' using the setView function passed from App.tsx."
+          "description": "Review and restore any broken repair order placement or update logic from version 13. Ensure form validation, cost calculations, and submission handlers work correctly. Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected. Verify the wizard completes successfully for both create and edit modes."
+        },
+        {
+          "path": "frontend/src/features/misc/PiercingWizard.tsx",
+          "operation": "modify",
+          "description": "Review and restore any broken piercing service placement logic from version 13. Ensure form validation and submission handlers work correctly. Verify the wizard completes successfully."
+        },
+        {
+          "path": "frontend/src/features/misc/OtherWizard.tsx",
+          "operation": "modify",
+          "description": "Review and restore any broken other service placement logic from version 13. Ensure form validation and submission handlers work correctly. Verify the wizard completes successfully."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
+          "operation": "modify",
+          "description": "Review and restore any broken dashboard statistics or recent records display logic from version 13. Ensure all statistics cards and recent records tables render correctly for orders, repair orders, piercing services, and other services."
+        },
+        {
+          "path": "frontend/src/features/orders/OrdersView.tsx",
+          "operation": "modify",
+          "description": "Review and restore any broken order listing or navigation logic from version 13. Ensure the orders table displays correctly and edit/create actions work as expected."
+        },
+        {
+          "path": "frontend/src/features/repairs/RepairOrdersView.tsx",
+          "operation": "modify",
+          "description": "Review and restore any broken repair order listing or navigation logic from version 13. Ensure the repair orders table displays correctly and edit/create actions work as expected."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Review and restore any broken routing or view state management from version 13. Ensure all view transitions work correctly and edit state is properly managed for all service types."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected in the repair order form",
+      "acceptanceCriteria": [
+        "When 'Other' material is selected, the 'Added Material Weight' field is disabled",
+        "When 'Other' material is selected, the 'Material Cost' field is disabled",
+        "The disabled fields behavior matches version 14 implementation"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/repairs/RepairWizard.tsx",
+          "operation": "modify",
+          "description": "Verify and preserve the logic that disables 'Added Material Weight' and 'Material Cost' input fields when the 'Other' material option is selected. Ensure this conditional disabling is applied to the relevant form inputs in the repair order wizard and that disabled fields are visually indicated to the user."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Create RepairWizard component with multi-step form for capturing all repair order fields including auto-calculated total cost",
+      "summary": "Ensure dashboard statistics and recent records display correctly for all service types",
       "acceptanceCriteria": [
-        "Form includes all specified fields with appropriate input types",
-        "Material dropdown offers gold, silver, and other options",
-        "Total cost auto-calculates from material cost + making charge",
-        "Date and delivery date use date picker inputs",
-        "Status dropdowns show correct options",
-        "Form validation ensures required fields are filled",
-        "Successful submission creates a new repair order"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/repairs/repairTypes.ts",
-          "operation": "create",
-          "description": "Define TypeScript types for repair orders: RepairFormData interface with fields (date, material, addedMaterialWeight, materialCost, makingCharge, totalCost, deliveryDate, assignTo, status, deliveryStatus). Define constants for REPAIR_MATERIALS (gold, silver, other), REPAIR_STATUSES (on_process, complete), and DELIVERY_STATUSES (pending, delivered)."
-        },
-        {
-          "path": "frontend/src/features/repairs/RepairWizard.tsx",
-          "operation": "create",
-          "description": "Create multi-step form wizard following the pattern from OrderWizard.tsx. Include steps for: (1) basic details (date, material dropdown, assign to), (2) measurements and costs (added material weight, material cost, making charge with auto-calculated total cost display), (3) delivery and status (delivery date picker, status dropdown, delivery status dropdown). Use StepIndicator component for progress visualization. Integrate usePlaceRepairOrder and useUpdateRepairOrder hooks. Handle both create and edit modes using editingRepairId prop."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Create RepairOrdersView component displaying a table of all repair orders with edit and view actions",
-      "acceptanceCriteria": [
-        "Table displays all repair order fields in organized columns",
-        "Weight and cost values are formatted correctly with decimals",
-        "Dates are formatted in readable format",
-        "Edit action opens the repair order in edit mode",
-        "Table supports pagination if there are many repairs",
-        "Status fields display with appropriate visual styling"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/repairs/RepairOrdersView.tsx",
-          "operation": "create",
-          "description": "Create table view component following the pattern from OrdersView.tsx. Display columns for repair ID, date, material, added weight, material cost, making charge, total cost, delivery date, assigned to, status, and delivery status. Use useRecentRepairOrders hook to fetch up to 50 repair orders. Format weights and costs using formatters from frontend/src/lib/formatters.ts (divide by 100 for display). Format dates using formatTimestamp. Include edit button that calls onEditRepair callback. Add success message display for create/update operations using successPayload prop."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Create React Query hooks for repair order CRUD operations following existing order hook patterns",
-      "acceptanceCriteria": [
-        "All hooks properly convert form data to backend format",
-        "Mutations invalidate relevant queries on success",
-        "Hooks handle authorization and error states",
-        "Weight and cost conversions maintain precision (value * 100)"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-          "operation": "create",
-          "description": "Create React Query mutation hook following the pattern from usePlaceOrder.ts. Convert form data to backend format: multiply weight and cost fields by 100 to convert to BigInt storage format. Call actor.createRepairOrder with all parameters. Handle authorization errors with user-friendly messages. Invalidate 'recentRepairOrders' and 'repairOrderStats' queries on success. Return repair order ID from mutation."
-        },
-        {
-          "path": "frontend/src/features/repairs/useUpdateRepairOrder.ts",
-          "operation": "create",
-          "description": "Create React Query mutation hook following the pattern from useUpdateOrder.ts. Accept repairId and form data. Convert dates to BigInt timestamps and multiply weight/cost fields by 100. Call actor.updateRepairOrder with repairId and all parameters. Handle errors and invalidate relevant queries on success."
-        },
-        {
-          "path": "frontend/src/features/repairs/useGetRepairOrder.ts",
-          "operation": "create",
-          "description": "Create React Query hook following the pattern from useGetOrder.ts. Accept repairId parameter. Call actor.getRepairOrder(repairId). Handle authorization and not-found errors with user-friendly messages. Return repair order data for editing."
-        },
-        {
-          "path": "frontend/src/features/repairs/useRecentRepairOrders.ts",
-          "operation": "create",
-          "description": "Create React Query hook following the pattern from useRecentOrders.ts. Accept count parameter (default 50). Call actor.getRecentRepairOrders(count). Return array of repair order records for display in RepairOrdersView."
-        },
-        {
-          "path": "frontend/src/features/repairs/useRepairOrderStats.ts",
-          "operation": "create",
-          "description": "Create React Query hook following the pattern from useOrderStats.ts. Call actor.getRepairOrderStats() to fetch aggregated statistics. Return RepairOrderStats containing totalOrders, totalMaterialCost, totalMakingCharge, and totalCost for dashboard display."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Add repair order statistics card to the dashboard showing counts and breakdowns",
-      "acceptanceCriteria": [
-        "Dashboard displays repair order statistics separately from regular orders",
-        "Statistics show total count and breakdown by material",
-        "Status breakdown shows on_process vs complete repairs",
-        "Statistics update when new repairs are added"
+        "Dashboard loads and displays statistics cards",
+        "Recent orders appear in the dashboard",
+        "Recent repair orders appear in the dashboard",
+        "Recent piercing and other services appear in the dashboard"
       ],
       "file_operations": [
         {
           "path": "frontend/src/features/dashboard/DashboardView.tsx",
           "operation": "modify",
-          "description": "Add a new statistics card section for repair orders below the existing order statistics. Use useRepairOrderStats hook to fetch repair statistics. Display total repair orders count, total material cost, total making charge, and total cost formatted with proper decimals. Calculate and display material breakdown by fetching recent repairs and grouping by material type. Calculate status breakdown showing counts for on_process vs complete statuses. Add navigation button to view all repair orders that sets view to 'repair'."
+          "description": "Review the dashboard component to ensure all statistics cards (OrderStats, RepairOrderStats, PiercingStats, OtherServiceStats) are fetched and displayed correctly. Verify that recent records tables for all four service types (orders, repair orders, piercing services, other services) render properly with correct data formatting and navigation callbacks."
+        },
+        {
+          "path": "frontend/src/features/dashboard/useOrderStats.ts",
+          "operation": "modify",
+          "description": "Verify the order statistics hook fetches data correctly from the backend actor and handles errors appropriately."
+        },
+        {
+          "path": "frontend/src/features/repairs/useRepairOrderStats.ts",
+          "operation": "modify",
+          "description": "Verify the repair order statistics hook fetches data correctly from the backend actor and handles errors appropriately."
+        },
+        {
+          "path": "frontend/src/features/misc/usePiercingServiceStats.ts",
+          "operation": "modify",
+          "description": "Verify the piercing service statistics hook fetches data correctly from the backend actor and handles authorization errors appropriately."
+        },
+        {
+          "path": "frontend/src/features/misc/useOtherServiceStats.ts",
+          "operation": "modify",
+          "description": "Verify the other service statistics hook fetches data correctly from the backend actor and handles authorization errors appropriately."
+        },
+        {
+          "path": "frontend/src/features/orders/useRecentOrders.ts",
+          "operation": "modify",
+          "description": "Verify the recent orders hook fetches the correct number of recent orders and handles errors appropriately."
+        },
+        {
+          "path": "frontend/src/features/repairs/useRecentRepairOrders.ts",
+          "operation": "modify",
+          "description": "Verify the recent repair orders hook fetches the correct number of recent repair orders and handles errors appropriately."
+        },
+        {
+          "path": "frontend/src/features/misc/useRecentPiercingServices.ts",
+          "operation": "modify",
+          "description": "Verify the recent piercing services hook fetches the correct number of recent services with authorization error handling."
+        },
+        {
+          "path": "frontend/src/features/misc/useRecentOtherServices.ts",
+          "operation": "modify",
+          "description": "Verify the recent other services hook fetches the correct number of recent services with authorization error handling."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
+      "acceptanceCriteria": [
+        "OrderWizard successfully creates and edits orders",
+        "RepairWizard successfully creates and edits repair orders",
+        "PiercingWizard successfully creates piercing services",
+        "OtherWizard successfully creates other services",
+        "Form validation works correctly in all wizards"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/orders/OrderWizard.tsx",
+          "operation": "modify",
+          "description": "Test and validate the complete order wizard workflow for both create and edit modes. Ensure form validation triggers on invalid inputs, weight calculations work correctly based on order type, and the wizard successfully submits to the backend via usePlaceOrder or useUpdateOrder hooks. Verify error handling and success navigation."
+        },
+        {
+          "path": "frontend/src/features/repairs/RepairWizard.tsx",
+          "operation": "modify",
+          "description": "Test and validate the complete repair order wizard workflow for both create and edit modes. Ensure form validation triggers on invalid inputs, cost calculations (auto-calculating total cost from material cost and making charge) work correctly, the 'Other' material disabling logic is preserved, and the wizard successfully submits to the backend via usePlaceRepairOrder or useUpdateRepairOrder hooks. Verify error handling and success navigation."
+        },
+        {
+          "path": "frontend/src/features/misc/PiercingWizard.tsx",
+          "operation": "modify",
+          "description": "Test and validate the complete piercing service wizard workflow. Ensure form validation triggers on invalid inputs (date, name, phone, amount), and the wizard successfully submits to the backend via usePlacePiercingService hook. Verify error handling and success navigation."
+        },
+        {
+          "path": "frontend/src/features/misc/OtherWizard.tsx",
+          "operation": "modify",
+          "description": "Test and validate the complete other service wizard workflow. Ensure form validation triggers on invalid inputs (name, phone, amount), and the wizard successfully submits to the backend via usePlaceOtherService hook. Verify error handling and success navigation."
+        },
+        {
+          "path": "frontend/src/features/orders/usePlaceOrder.ts",
+          "operation": "modify",
+          "description": "Verify the place order mutation correctly sanitizes numeric inputs to BigInt format and invalidates related queries (recent orders, order stats) on success."
+        },
+        {
+          "path": "frontend/src/features/orders/useUpdateOrder.ts",
+          "operation": "modify",
+          "description": "Verify the update order mutation correctly converts dates to nanoseconds, sanitizes numeric inputs, and invalidates related queries on success."
+        },
+        {
+          "path": "frontend/src/features/repairs/usePlaceRepairOrder.ts",
+          "operation": "modify",
+          "description": "Verify the place repair order mutation correctly converts form data to backend format (dates to nanoseconds, decimals to BigInt cents) and invalidates related queries on success."
+        },
+        {
+          "path": "frontend/src/features/repairs/useUpdateRepairOrder.ts",
+          "operation": "modify",
+          "description": "Verify the update repair order mutation correctly converts data and invalidates related queries on success."
+        },
+        {
+          "path": "frontend/src/features/misc/usePlacePiercingService.ts",
+          "operation": "modify",
+          "description": "Verify the place piercing service mutation correctly converts date to nanoseconds and amount to BigInt, then invalidates the recent services cache on success."
+        },
+        {
+          "path": "frontend/src/features/misc/usePlaceOtherService.ts",
+          "operation": "modify",
+          "description": "Verify the place other service mutation correctly sanitizes numeric inputs to BigInt and invalidates the recent services cache on success."
         }
       ]
     }

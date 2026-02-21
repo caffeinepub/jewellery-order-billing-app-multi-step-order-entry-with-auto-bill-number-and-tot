@@ -1,165 +1,104 @@
 {
   "kind": "build_request",
-  "title": "Add repair order management menu",
-  "projectName": "Jewelry Shop Manager",
-  "priority": "normal",
+  "title": "Restore version 13 functionality while preserving version 14 changes",
+  "projectName": "RepairWizard",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a new 'Repair' section to the main navigation menu that allows users to create and manage repair orders separately from regular orders",
-      "target": "frontend",
+      "text": "Restore all functionality that was working in version 13 but is now broken in version 14",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
+        ],
+        "quotes": [
+          "function are not working as version 13"
         ]
       },
       "acceptanceCriteria": [
-        "Navigation menu includes a 'Repair' option",
-        "Clicking 'Repair' navigates to the repair orders view",
-        "Repair section is accessible from the dashboard"
+        "All backend functions that worked in version 13 are operational",
+        "All frontend components that worked in version 13 are functional",
+        "User workflows from version 13 complete successfully"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Create a RepairOrder data type in the backend with fields: date (Nat timestamp), material (Text variant of gold/silver/other), addedMaterialWeight (Nat for grams * 100), materialCost (Nat for rupees * 100), makingCharge (Nat for rupees * 100), totalCost (Nat for rupees * 100), deliveryDate (Nat timestamp), assignTo (Text for staff assignment), status (Text variant of on_process/complete), and deliveryStatus (Text variant of pending/delivered)",
-      "target": "backend",
+      "text": "Preserve the version 14 feature that disables 'Added Material Weight' and 'Material Cost' fields when 'Other' material is selected in the repair order form",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
         ],
         "quotes": [
-          "date",
-          "material(gold,silver,other)",
-          "added material weight",
-          "material cost",
-          "making charge",
-          "total cost",
-          "delivery date",
-          "assign to",
-          "status(on process,complete)",
-          "delivery status (pending/delivered)"
+          "keeping the recent function that had been done in version 14"
         ]
       },
       "acceptanceCriteria": [
-        "RepairOrder type defined with all specified fields",
-        "Material field supports gold, silver, and other options",
-        "Status field supports on_process and complete states",
-        "Delivery status field supports pending and delivered states",
-        "Weight and cost fields use Nat type for precision (value * 100)"
+        "When 'Other' material is selected, the 'Added Material Weight' field is disabled",
+        "When 'Other' material is selected, the 'Material Cost' field is disabled",
+        "The disabled fields behavior matches version 14 implementation"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Implement backend CRUD functions for repair orders: createRepairOrder, updateRepairOrder, getRepairOrder, getRecentRepairOrders, and getRepairOrderStats with authorization checks similar to existing order functions",
+      "text": "Verify that order placement, update, and retrieval functions work correctly for all order types (orders, repair orders, piercing services, other services)",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
         ]
       },
       "acceptanceCriteria": [
-        "All CRUD operations enforce authorization checks",
-        "Repair orders are stored with auto-incrementing ID",
-        "Functions return appropriate success/error results",
-        "Stats function calculates total repairs and aggregated metrics"
+        "Users can create new orders successfully",
+        "Users can update existing orders successfully",
+        "Users can retrieve and view order details",
+        "All CRUD operations work for repairs, piercing, and other services"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Create a RepairWizard component with a multi-step form capturing date, material selection (gold/silver/other dropdown), added material weight input, material cost input, making charge input (with auto-calculated total cost), delivery date picker, assign to text field, status dropdown (on process/complete), and delivery status dropdown (pending/delivered)",
+      "text": "Ensure dashboard statistics and recent records display correctly for all service types",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "date",
-          "material(gold,silver,other)",
-          "added material weight",
-          "material cost",
-          "making charge",
-          "total cost",
-          "delivery date",
-          "assign to",
-          "status(on process,complete)",
-          "delivery status (pending/delivered)"
+          "msg-4"
         ]
       },
       "acceptanceCriteria": [
-        "Form includes all specified fields with appropriate input types",
-        "Material dropdown offers gold, silver, and other options",
-        "Total cost auto-calculates from material cost + making charge",
-        "Date and delivery date use date picker inputs",
-        "Status dropdowns show correct options",
-        "Form validation ensures required fields are filled",
-        "Successful submission creates a new repair order"
+        "Dashboard loads and displays statistics cards",
+        "Recent orders appear in the dashboard",
+        "Recent repair orders appear in the dashboard",
+        "Recent piercing and other services appear in the dashboard"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Create a RepairOrdersView component displaying a table of all repair orders with columns for ID, date, material, added weight, costs, delivery date, assigned to, status, and delivery status, with edit and view actions for each repair order",
+      "text": "Validate that all wizard forms (OrderWizard, RepairWizard, PiercingWizard, OtherWizard) complete their workflows without errors",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
         ]
       },
       "acceptanceCriteria": [
-        "Table displays all repair order fields in organized columns",
-        "Weight and cost values are formatted correctly with decimals",
-        "Dates are formatted in readable format",
-        "Edit action opens the repair order in edit mode",
-        "Table supports pagination if there are many repairs",
-        "Status fields display with appropriate visual styling"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Create React Query hooks for repair orders: usePlaceRepairOrder, useUpdateRepairOrder, useGetRepairOrder, and useRecentRepairOrders following the same patterns as existing order hooks",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All hooks properly convert form data to backend format",
-        "Mutations invalidate relevant queries on success",
-        "Hooks handle authorization and error states",
-        "Weight and cost conversions maintain precision (value * 100)"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Add a repair orders statistics card to the dashboard showing total repair orders count, total repairs by material type, and repairs by status",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Dashboard displays repair order statistics separately from regular orders",
-        "Statistics show total count and breakdown by material",
-        "Status breakdown shows on_process vs complete repairs",
-        "Statistics update when new repairs are added"
+        "OrderWizard successfully creates and edits orders",
+        "RepairWizard successfully creates and edits repair orders",
+        "PiercingWizard successfully creates piercing services",
+        "OtherWizard successfully creates other services",
+        "Form validation works correctly in all wizards"
       ]
     }
   ],
   "constraints": [
-    "Maintain single-actor architecture in backend/main.mo",
-    "Follow existing patterns for order management CRUD operations",
-    "Use the same authorization checks as existing order functions",
-    "Preserve the existing Order type and functions without modification",
-    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui"
+    "Do not remove or modify the version 14 feature that disables material weight and cost fields when 'Other' is selected",
+    "Maintain the existing backend actor architecture with all service types",
+    "Preserve the current authentication and authorization system"
   ],
   "nonGoals": [
-    "Integration with external repair tracking systems",
-    "SMS or email notifications for repair status changes",
-    "Photo upload for repair items",
-    "Repair history or warranty tracking",
-    "Customer communication features",
-    "Advanced reporting or analytics beyond basic statistics"
+    "Adding new features beyond restoring version 13 functionality",
+    "Changing the UI design or styling",
+    "Modifying the data models or schema structure"
   ],
   "imageRequirements": {
     "required": [],
