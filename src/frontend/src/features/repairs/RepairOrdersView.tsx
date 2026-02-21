@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { useRecentRepairOrders } from './useRecentRepairOrders';
+import { useGetAllRepairOrders } from './useGetAllRepairOrders';
 import { formatDate } from '@/lib/formatters';
-import { Loader2, Edit, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 interface RepairOrdersViewProps {
   onNewRepair: () => void;
@@ -14,7 +14,7 @@ interface RepairOrdersViewProps {
 }
 
 export default function RepairOrdersView({ onNewRepair, onEditRepair, successPayload }: RepairOrdersViewProps) {
-  const { data: repairs, isLoading, error } = useRecentRepairOrders(50);
+  const { data: repairs, isLoading, error } = useGetAllRepairOrders();
 
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status.toLowerCase()) {
@@ -46,16 +46,28 @@ export default function RepairOrdersView({ onNewRepair, onEditRepair, successPay
     return (Number(value) / 100).toFixed(2);
   };
 
+  console.log('RepairOrdersView: Rendering with', repairs?.length || 0, 'repair orders');
+  if (error) {
+    console.error('RepairOrdersView: Error loading repair orders:', error);
+  }
+
   return (
     <div className="space-y-6">
       {successPayload && (
         <Alert className="border-success bg-success/10">
           <CheckCircle2 className="h-4 w-4 text-success" />
           <AlertDescription>
-            Repair Order #{successPayload.repairId} has been {successPayload.isUpdate ? 'updated' : 'saved'} successfully!
+            Repair Order has been {successPayload.isUpdate ? 'updated' : 'saved'} successfully!
           </AlertDescription>
         </Alert>
       )}
+
+      <Alert className="border-warning bg-warning/10">
+        <AlertTriangle className="h-4 w-4 text-warning" />
+        <AlertDescription>
+          Note: Editing repair orders is temporarily disabled due to a backend limitation. The backend needs to include repair IDs in the returned records. Please contact support if you need to edit existing repair orders.
+        </AlertDescription>
+      </Alert>
 
       <Card className="shadow-elegant">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -74,7 +86,7 @@ export default function RepairOrdersView({ onNewRepair, onEditRepair, successPay
           {error && (
             <Alert variant="destructive">
               <AlertDescription>
-                Failed to load repair orders. Please try again.
+                {error instanceof Error ? error.message : 'Failed to load repair orders. Please try again.'}
               </AlertDescription>
             </Alert>
           )}
@@ -100,7 +112,6 @@ export default function RepairOrdersView({ onNewRepair, onEditRepair, successPay
                     <TableHead>Assigned To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Delivery</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -128,16 +139,6 @@ export default function RepairOrdersView({ onNewRepair, onEditRepair, successPay
                         <Badge variant={getDeliveryStatusBadgeVariant(repair.deliveryStatus)}>
                           {repair.deliveryStatus}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditRepair(index + 1)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

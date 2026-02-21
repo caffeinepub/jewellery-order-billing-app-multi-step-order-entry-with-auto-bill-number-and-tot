@@ -47,6 +47,7 @@ export interface OrderRecord {
     customerName: string;
     deliveryAddress: string;
     palletType: string;
+    assignedTo?: bigint;
     netWeight: bigint;
     deliveryDate: Time;
     orderType: string;
@@ -69,6 +70,11 @@ export interface OtherServiceStats {
     totalCount: bigint;
     totalAmount: bigint;
 }
+export interface Employee {
+    id: bigint;
+    name: string;
+    phoneNo: string;
+}
 export interface UserProfile {
     name: string;
 }
@@ -78,10 +84,15 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addEmployee(name: string, phoneNo: string): Promise<bigint>;
     addOtherService(name: string, phone: string, amount: bigint, remarks: string): Promise<bigint>;
     addPiercingService(date: Time, name: string, phone: string, amount: bigint, remarks: string): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createRepairOrder(date: Time, material: string, addedMaterialWeight: bigint, materialCost: bigint, makingCharge: bigint, totalCost: bigint, deliveryDate: Time, assignTo: string, status: string, deliveryStatus: string): Promise<bigint>;
+    getAllOrders(): Promise<Array<OrderRecord>>;
+    getAllOtherServices(): Promise<Array<OtherServiceRecord>>;
+    getAllPiercingServices(): Promise<Array<PiercingServiceRecord>>;
+    getAllRepairOrders(): Promise<Array<RepairOrderRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getOrder(billNo: bigint): Promise<OrderRecord>;
@@ -98,8 +109,9 @@ export interface backendInterface {
     getRepairOrderStats(): Promise<RepairOrderStats>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    placeOrder(customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint): Promise<bigint>;
+    listEmployees(): Promise<Array<Employee>>;
+    placeOrder(customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint, assignedTo: bigint | null): Promise<bigint>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateOrder(billNo: bigint, customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint, deliveryDate: Time): Promise<void>;
+    updateOrder(billNo: bigint, customerName: string, orderType: string, material: string, materialDescription: string, palletType: string, pickupLocation: string, deliveryAddress: string, deliveryContact: string, netWeight: bigint, grossWeight: bigint, cutWeight: bigint, deliveryDate: Time, assignedTo: bigint | null): Promise<void>;
     updateRepairOrder(repairId: bigint, date: Time, material: string, addedMaterialWeight: bigint, materialCost: bigint, makingCharge: bigint, totalCost: bigint, deliveryDate: Time, assignTo: string, status: string, deliveryStatus: string): Promise<void>;
 }

@@ -1,6 +1,122 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix deployment error - Frontend plan",
-  "requirements": []
+  "title": "Debug and fix application error in Version 26",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Fix data fetching issues preventing old orders from loading in OrdersView component",
+      "acceptanceCriteria": [
+        "All historical orders load successfully in the Orders table",
+        "No console errors related to order fetching",
+        "Order data displays correctly with all fields populated"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/orders/useGetAllOrders.ts",
+          "operation": "modify",
+          "description": "Add comprehensive error logging to identify why getAllOrders query fails for historical data. Log the raw response from backend, check for data transformation issues, and add console output for debugging query execution flow."
+        },
+        {
+          "path": "frontend/src/features/orders/OrdersView.tsx",
+          "operation": "modify",
+          "description": "Add detailed error state rendering to display specific error messages when order data fails to load. Include debugging output in console to trace data transformation from backend response to table display. Verify date conversion from nanoseconds is working correctly for old orders."
+        },
+        {
+          "path": "frontend/src/lib/formatters.ts",
+          "operation": "modify",
+          "description": "Add validation and error handling for date conversion from nanoseconds, especially for older timestamps. Log any conversion failures with the raw nanosecond value to identify if date formatting is causing display issues."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Fix data fetching issues preventing old repair orders from loading in RepairOrdersView component",
+      "acceptanceCriteria": [
+        "All historical repair orders load successfully in the Repair Orders table",
+        "No console errors related to repair order fetching",
+        "Repair order data displays correctly with all fields including weights and costs"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/repairs/useGetAllRepairOrders.ts",
+          "operation": "modify",
+          "description": "Add comprehensive error logging to identify why getAllRepairOrders query fails for historical data. Log the raw backend response, verify bigint conversions for weights and costs, and add debugging output for query execution."
+        },
+        {
+          "path": "frontend/src/features/repairs/RepairOrdersView.tsx",
+          "operation": "modify",
+          "description": "Add detailed error state rendering and console debugging to trace data transformation issues. Verify currency and weight formatting from bigint values is working correctly for old repair orders. Log any field mapping issues."
+        },
+        {
+          "path": "frontend/src/lib/formatters.ts",
+          "operation": "modify",
+          "description": "Add validation and error handling for bigint to currency/weight conversions, especially for large or edge-case values. Log conversion failures with raw bigint values to identify numeric formatting issues."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Fix data fetching issues preventing old service records from loading in piercing and other services list views",
+      "acceptanceCriteria": [
+        "All historical piercing service records load successfully",
+        "All historical other service records load successfully",
+        "No console errors related to service record fetching",
+        "Service data displays correctly in their respective tables"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/misc/useGetAllPiercingServices.ts",
+          "operation": "modify",
+          "description": "Add comprehensive error logging to identify why getAllPiercingServices query fails for historical data. Log the raw backend response, verify date and amount conversions, and add debugging output for query execution flow."
+        },
+        {
+          "path": "frontend/src/features/misc/useGetAllOtherServices.ts",
+          "operation": "modify",
+          "description": "Add comprehensive error logging to identify why getAllOtherServices query fails for historical data. Log the raw backend response, verify amount conversions from bigint, and add debugging output for query execution flow."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
+          "operation": "modify",
+          "description": "Add detailed error state rendering for the recent services tables. Include console debugging to trace data transformation issues from backend response to table display for both piercing and other services."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add comprehensive error logging and debugging output across all list views",
+      "acceptanceCriteria": [
+        "Clear error messages are logged to console when data fetching fails",
+        "Error messages indicate which specific query or data transformation step failed",
+        "User-friendly error states are displayed in the UI when data cannot be loaded"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Add detailed logging for actor initialization and authentication flow. Log when actor becomes available, authentication state changes, and any errors during actor creation to help identify connection issues."
+        },
+        {
+          "path": "frontend/src/features/orders/useRecentOrders.ts",
+          "operation": "modify",
+          "description": "Add error logging and debugging output to trace why recent orders query might succeed while getAllOrders fails. Log query execution state, backend response, and data transformation steps."
+        },
+        {
+          "path": "frontend/src/features/repairs/useRecentRepairOrders.ts",
+          "operation": "modify",
+          "description": "Add error logging and debugging output to trace why recent repair orders query might succeed while getAllRepairOrders fails. Log query execution state, backend response, and data transformation steps."
+        },
+        {
+          "path": "frontend/src/features/misc/useRecentPiercingServices.ts",
+          "operation": "modify",
+          "description": "Add error logging and debugging output to trace why recent piercing services query might succeed while getAllPiercingServices fails. Log query execution state and data transformation steps."
+        },
+        {
+          "path": "frontend/src/features/misc/useRecentOtherServices.ts",
+          "operation": "modify",
+          "description": "Add error logging and debugging output to trace why recent other services query might succeed while getAllOtherServices fails. Log query execution state and data transformation steps."
+        }
+      ]
+    }
+  ]
 }

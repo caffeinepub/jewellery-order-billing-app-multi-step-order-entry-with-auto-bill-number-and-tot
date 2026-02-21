@@ -1,28 +1,25 @@
 import Nat "mo:core/Nat";
 import Map "mo:core/Map";
+import Array "mo:core/Array";
 import Text "mo:core/Text";
 import Int "mo:core/Int";
+import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
-import Principal "mo:core/Principal";
-import Migration "migration";
-
-import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
 
-(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  type PersistentUserProfileStore = Map.Map<Principal, UserProfile>;
-  var persistentUserProfiles : PersistentUserProfileStore = Map.empty<Principal, UserProfile>();
-
   public type UserProfile = {
     name : Text;
   };
+
+  var persistentUserProfiles = Map.empty<Principal, UserProfile>();
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
@@ -45,8 +42,43 @@ actor {
     persistentUserProfiles.add(caller, profile);
   };
 
-  // -- Order Management
-  type OrderRecord = {
+  // Employee Management
+  public type Employee = {
+    id : Nat;
+    name : Text;
+    phoneNo : Text;
+  };
+
+  var employees = Map.empty<Nat, Employee>();
+  var nextEmployeeId = 1;
+
+  public shared ({ caller }) func addEmployee(name : Text, phoneNo : Text) : async Nat {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can add employees");
+    };
+
+    let employeeId = nextEmployeeId;
+    nextEmployeeId += 1;
+
+    let employee : Employee = {
+      id = employeeId;
+      name;
+      phoneNo;
+    };
+
+    employees.add(employeeId, employee);
+    employeeId;
+  };
+
+  public query ({ caller }) func listEmployees() : async [Employee] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view employees");
+    };
+    employees.values().toArray();
+  };
+
+  // Order Management
+  public type OrderRecord = {
     billNo : Nat;
     timestamp : Time.Time;
     customerName : Text;
@@ -61,6 +93,7 @@ actor {
     grossWeight : Int;
     cutWeight : Int;
     deliveryDate : Time.Time;
+    assignedTo : ?Nat; // Optional Employee ID
   };
 
   module OrderRecord {
@@ -84,6 +117,7 @@ actor {
     netWeight : Int,
     grossWeight : Int,
     cutWeight : Int,
+    assignedTo : ?Nat,
   ) : async Nat {
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can place orders");
@@ -107,6 +141,7 @@ actor {
       grossWeight;
       cutWeight;
       deliveryDate = 0;
+      assignedTo;
     };
 
     orders.add(billNo, order);
@@ -127,6 +162,7 @@ actor {
     grossWeight : Int,
     cutWeight : Int,
     deliveryDate : Time.Time,
+    assignedTo : ?Nat,
   ) : async () {
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can update orders");
@@ -150,6 +186,7 @@ actor {
           grossWeight;
           cutWeight;
           deliveryDate;
+          assignedTo;
         };
         orders.add(billNo, updatedOrder);
       };
@@ -172,7 +209,19 @@ actor {
       Runtime.trap("Unauthorized: Only users can view orders");
     };
 
-    orders.values().toArray().sort().sliceToArray(0, count);
+    if (count == 0) { return []; };
+
+    let sortedArray = orders.values().toArray().sort();
+    let limit = if (count > sortedArray.size()) { sortedArray.size() } else { count };
+
+    sortedArray.sliceToArray(0, limit);
+  };
+
+  public query ({ caller }) func getAllOrders() : async [OrderRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view orders");
+    };
+    orders.values().toArray();
   };
 
   public type OrderStats = {
@@ -206,7 +255,7 @@ actor {
   };
 
   // -- Repair Orders
-  type RepairOrderRecord = {
+  public type RepairOrderRecord = {
     date : Time.Time;
     material : Text;
     addedMaterialWeight : Int;
@@ -217,12 +266,6 @@ actor {
     assignTo : Text;
     status : Text;
     deliveryStatus : Text;
-  };
-
-  module RepairOrderRecord {
-    public func compare(a : RepairOrderRecord, b : RepairOrderRecord) : Order.Order {
-      Int.compare(b.date, a.date);
-    };
   };
 
   var repairOrders = Map.empty<Nat, RepairOrderRecord>();
@@ -317,7 +360,20 @@ actor {
       Runtime.trap("Unauthorized: Only users can view repair orders");
     };
 
-    repairOrders.values().toArray().sort().sliceToArray(0, count);
+    if (count == 0) { return []; };
+
+    let repairOrdersArray = repairOrders.values().toArray();
+    let size = repairOrdersArray.size();
+    let limit = if (count > size) { size } else { count };
+
+    repairOrdersArray.sliceToArray(0, limit);
+  };
+
+  public query ({ caller }) func getAllRepairOrders() : async [RepairOrderRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view repair orders");
+    };
+    repairOrders.values().toArray();
   };
 
   public type RepairOrderStats = {
@@ -350,18 +406,13 @@ actor {
     };
   };
 
+  // Service Records (Piercing and Other)
   public type PiercingServiceRecord = {
     date : Time.Time;
     name : Text;
     phone : Text;
     amount : Int;
     remarks : Text;
-  };
-
-  module PiercingServiceRecord {
-    public func compare(a : PiercingServiceRecord, b : PiercingServiceRecord) : Order.Order {
-      Int.compare(b.date, a.date);
-    };
   };
 
   public type OtherServiceRecord = {
@@ -417,7 +468,19 @@ actor {
       Runtime.trap("Unauthorized: Only users can view services");
     };
 
-    piercingServices.values().toArray().sort().sliceToArray(0, count);
+    if (count == 0) { return []; };
+
+    let size = piercingServices.size();
+    let limit = if (count > size) { size } else { count };
+
+    piercingServices.values().toArray().sliceToArray(0, limit);
+  };
+
+  public query ({ caller }) func getAllPiercingServices() : async [PiercingServiceRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view services");
+    };
+    piercingServices.values().toArray();
   };
 
   public type PiercingStats = {
@@ -481,7 +544,19 @@ actor {
       Runtime.trap("Unauthorized: Only users can view services");
     };
 
-    otherServices.values().toArray().sliceToArray(0, count);
+    if (count == 0) { return []; };
+
+    let size = otherServices.size();
+    let limit = if (count > size) { size } else { count };
+
+    otherServices.values().toArray().sliceToArray(0, limit);
+  };
+
+  public query ({ caller }) func getAllOtherServices() : async [OtherServiceRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can view services");
+    };
+    otherServices.values().toArray();
   };
 
   public type OtherServiceStats = {
@@ -505,3 +580,4 @@ actor {
     { totalCount; totalAmount };
   };
 };
+

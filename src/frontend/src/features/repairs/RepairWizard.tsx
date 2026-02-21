@@ -7,6 +7,7 @@ import StepIndicator from '../../components/StepIndicator';
 import { usePlaceRepairOrder } from './usePlaceRepairOrder';
 import { useUpdateRepairOrder } from './useUpdateRepairOrder';
 import { useGetRepairOrder } from './useGetRepairOrder';
+import { useListEmployees } from '../employees/useListEmployees';
 import { REPAIR_MATERIALS, REPAIR_STATUSES, DELIVERY_STATUSES, RepairFormData, initialRepairFormData } from './repairTypes';
 import { toast } from 'sonner';
 
@@ -23,6 +24,7 @@ export default function RepairWizard({ onCancel, onSuccess, editRepairId }: Repa
 
   const isEditMode = editRepairId !== null && editRepairId !== undefined;
   const { data: existingRepairOrder, isLoading: isLoadingRepairOrder } = useGetRepairOrder(editRepairId || 0);
+  const { data: employees = [], isLoading: isLoadingEmployees } = useListEmployees();
 
   const placeRepairOrderMutation = usePlaceRepairOrder();
   const updateRepairOrderMutation = useUpdateRepairOrder();
@@ -40,7 +42,7 @@ export default function RepairWizard({ onCancel, onSuccess, editRepairId }: Repa
         makingCharge: (Number(existingRepairOrder.makingCharge) / 100).toFixed(2),
         totalCost: (Number(existingRepairOrder.totalCost) / 100).toFixed(2),
         deliveryDate: deliveryDateValue,
-        assignTo: existingRepairOrder.assignTo,
+        assignedTo: existingRepairOrder.assignTo,
         status: existingRepairOrder.status as '' | 'On process' | 'Complete',
         deliveryStatus: existingRepairOrder.deliveryStatus as '' | 'Pending' | 'Delivered',
       });
@@ -66,7 +68,6 @@ export default function RepairWizard({ onCancel, onSuccess, editRepairId }: Repa
 
     if (step === 1) {
       if (!formData.material) newErrors.material = 'Material is required';
-      if (!formData.assignTo.trim()) newErrors.assignTo = 'Assign To is required';
     }
 
     if (step === 2) {
@@ -192,15 +193,23 @@ export default function RepairWizard({ onCancel, onSuccess, editRepairId }: Repa
             </div>
 
             <div>
-              <Label htmlFor="assignTo">Assign To *</Label>
-              <Input
-                id="assignTo"
-                type="text"
-                value={formData.assignTo}
-                onChange={(e) => handleInputChange('assignTo', e.target.value)}
-                className={errors.assignTo ? 'border-destructive' : ''}
-              />
-              {errors.assignTo && <p className="text-sm text-destructive mt-1">{errors.assignTo}</p>}
+              <Label htmlFor="assignedTo">Assign To</Label>
+              <Select
+                value={formData.assignedTo}
+                onValueChange={(value) => handleInputChange('assignedTo', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingEmployees ? "Loading employees..." : "Select employee (optional)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Unassigned</SelectItem>
+                  {employees.map((employee) => (
+                    <SelectItem key={String(employee.id)} value={employee.name}>
+                      {employee.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}

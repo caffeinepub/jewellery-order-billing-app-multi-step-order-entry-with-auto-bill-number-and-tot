@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix deployment error and ensure proper data persistence across canister upgrades.
+**Goal:** Debug and fix data fetching errors preventing historical orders, repair orders, and service records from loading in the application.
 
 **Planned changes:**
-- Investigate and resolve the deployment error in the backend canister
-- Fix migration.mo to correctly handle state transformation from userProfiles to persistentUserProfiles during upgrades
-- Verify all backend Map data structures (orders, repair orders, piercing services, other services) are properly initialized and persisted using stable storage
+- Fix getAllOrders query implementation to properly load historical orders in OrdersView
+- Fix getAllRepairOrders query implementation to properly load historical repair orders in RepairOrdersView
+- Fix getAllPiercingServices and getAllOtherServices query implementations to properly load historical service records
+- Verify and correct backend query methods to return data in the correct format with all required fields
+- Add comprehensive error logging and user-friendly error states for failed data loading
 
-**User-visible outcome:** The application deploys successfully without errors, and all user data persists correctly across canister upgrades without data loss.
+**User-visible outcome:** All historical orders, repair orders, and service records load successfully in their respective tables without errors, displaying complete data for all fields.

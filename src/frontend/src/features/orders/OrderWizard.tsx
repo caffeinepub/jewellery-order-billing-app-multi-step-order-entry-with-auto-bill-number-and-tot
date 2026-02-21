@@ -8,6 +8,7 @@ import StepIndicator from '../../components/StepIndicator';
 import { usePlaceOrder } from './usePlaceOrder';
 import { useUpdateOrder } from './useUpdateOrder';
 import { useGetOrder } from './useGetOrder';
+import { useListEmployees } from '../employees/useListEmployees';
 import { MATERIALS, ORDER_TYPES, OrderFormData, initialFormData, getWeightFieldsEnabled } from './orderTypes';
 import { toast } from 'sonner';
 
@@ -24,6 +25,7 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
 
   const isEditMode = editBillNo !== null && editBillNo !== undefined;
   const { data: existingOrder, isLoading: isLoadingOrder } = useGetOrder(editBillNo || 0);
+  const { data: employees = [], isLoading: isLoadingEmployees } = useListEmployees();
 
   const placeOrderMutation = usePlaceOrder();
   const updateOrderMutation = useUpdateOrder();
@@ -52,7 +54,7 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
         otherCharge: '0',
         totalCost: '0',
         deliveryDate: deliveryDateValue,
-        assignTo: existingOrder.deliveryAddress,
+        assignedTo: existingOrder.assignedTo ? String(existingOrder.assignedTo) : '',
         status: existingOrder.pickupLocation || 'Pending',
         remarks: existingOrder.palletType,
       });
@@ -187,12 +189,13 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
           materialDescription: formData.item,
           palletType: formData.remarks,
           pickupLocation: formData.status,
-          deliveryAddress: formData.assignTo,
+          deliveryAddress: formData.assignedTo || '',
           deliveryContact: formData.phoneNo,
           netWeight: formData.exchangeWt,
           grossWeight: formData.addedWt,
           cutWeight: formData.deductWt,
           deliveryDate: formData.deliveryDate,
+          assignedTo: formData.assignedTo || '',
         });
         toast.success('Order updated successfully!');
         onSuccess(BigInt(editBillNo));
@@ -205,11 +208,12 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
           materialDescription: formData.item,
           palletType: formData.remarks,
           pickupLocation: formData.status,
-          deliveryAddress: formData.assignTo,
+          deliveryAddress: formData.assignedTo || '',
           deliveryContact: formData.phoneNo,
           netWeight: formData.exchangeWt,
           grossWeight: formData.addedWt,
           cutWeight: formData.deductWt,
+          assignedTo: formData.assignedTo || '',
         });
         toast.success('Order created successfully!');
         onSuccess(billNo);
@@ -395,7 +399,7 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
                   id="totalWt"
                   value={formData.totalWt}
                   disabled
-                  className="bg-muted font-semibold"
+                  className="bg-muted"
                 />
               </div>
             </div>
@@ -406,7 +410,7 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="ratePerGm">Rate/gm (₹)</Label>
+                <Label htmlFor="ratePerGm">Rate per Gram (₹)</Label>
                 <Input
                   id="ratePerGm"
                   type="number"
@@ -423,7 +427,7 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
                   id="materialCost"
                   value={formData.materialCost}
                   disabled
-                  className="bg-muted font-semibold"
+                  className="bg-muted"
                 />
               </div>
             </div>
@@ -457,7 +461,7 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
                 id="totalCost"
                 value={formData.totalCost}
                 disabled
-                className="bg-muted font-semibold"
+                className="bg-muted"
               />
             </div>
           </div>
@@ -476,13 +480,23 @@ export default function OrderWizard({ onCancel, onSuccess, editBillNo }: OrderWi
             </div>
 
             <div>
-              <Label htmlFor="assignTo">Assign To</Label>
-              <Input
-                id="assignTo"
-                value={formData.assignTo}
-                onChange={(e) => handleInputChange('assignTo', e.target.value)}
-                placeholder="Enter person or team name"
-              />
+              <Label htmlFor="assignedTo">Assign To</Label>
+              <Select
+                value={formData.assignedTo}
+                onValueChange={(value) => handleInputChange('assignedTo', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingEmployees ? "Loading employees..." : "Select employee (optional)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Unassigned</SelectItem>
+                  {employees.map((employee) => (
+                    <SelectItem key={String(employee.id)} value={String(employee.id)}>
+                      {employee.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

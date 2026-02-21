@@ -14,11 +14,11 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const OrderRecord = IDL.Record({
   'customerName' : IDL.Text,
   'deliveryAddress' : IDL.Text,
   'palletType' : IDL.Text,
+  'assignedTo' : IDL.Opt(IDL.Nat),
   'netWeight' : IDL.Int,
   'deliveryDate' : Time,
   'orderType' : IDL.Text,
@@ -31,21 +31,11 @@ export const OrderRecord = IDL.Record({
   'material' : IDL.Text,
   'pickupLocation' : IDL.Text,
 });
-export const OrderStats = IDL.Record({
-  'totalOrders' : IDL.Nat,
-  'totalNetWeight' : IDL.Nat,
-  'totalCutWeight' : IDL.Nat,
-  'totalGrossWeight' : IDL.Nat,
-});
 export const OtherServiceRecord = IDL.Record({
   'name' : IDL.Text,
   'phone' : IDL.Text,
   'amount' : IDL.Int,
   'remarks' : IDL.Text,
-});
-export const OtherServiceStats = IDL.Record({
-  'totalCount' : IDL.Nat,
-  'totalAmount' : IDL.Nat,
 });
 export const PiercingServiceRecord = IDL.Record({
   'date' : Time,
@@ -53,10 +43,6 @@ export const PiercingServiceRecord = IDL.Record({
   'phone' : IDL.Text,
   'amount' : IDL.Int,
   'remarks' : IDL.Text,
-});
-export const PiercingStats = IDL.Record({
-  'totalCount' : IDL.Nat,
-  'totalAmount' : IDL.Nat,
 });
 export const RepairOrderRecord = IDL.Record({
   'status' : IDL.Text,
@@ -70,15 +56,36 @@ export const RepairOrderRecord = IDL.Record({
   'material' : IDL.Text,
   'makingCharge' : IDL.Int,
 });
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const OrderStats = IDL.Record({
+  'totalOrders' : IDL.Nat,
+  'totalNetWeight' : IDL.Nat,
+  'totalCutWeight' : IDL.Nat,
+  'totalGrossWeight' : IDL.Nat,
+});
+export const OtherServiceStats = IDL.Record({
+  'totalCount' : IDL.Nat,
+  'totalAmount' : IDL.Nat,
+});
+export const PiercingStats = IDL.Record({
+  'totalCount' : IDL.Nat,
+  'totalAmount' : IDL.Nat,
+});
 export const RepairOrderStats = IDL.Record({
   'totalMaterialCost' : IDL.Nat,
   'totalOrders' : IDL.Nat,
   'totalMakingCharge' : IDL.Nat,
   'totalCost' : IDL.Nat,
 });
+export const Employee = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'phoneNo' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addEmployee' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
   'addOtherService' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Int, IDL.Text],
       [IDL.Nat],
@@ -106,6 +113,18 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'getAllOrders' : IDL.Func([], [IDL.Vec(OrderRecord)], ['query']),
+  'getAllOtherServices' : IDL.Func(
+      [],
+      [IDL.Vec(OtherServiceRecord)],
+      ['query'],
+    ),
+  'getAllPiercingServices' : IDL.Func(
+      [],
+      [IDL.Vec(PiercingServiceRecord)],
+      ['query'],
+    ),
+  'getAllRepairOrders' : IDL.Func([], [IDL.Vec(RepairOrderRecord)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getOrder' : IDL.Func([IDL.Nat], [OrderRecord], ['query']),
@@ -142,6 +161,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listEmployees' : IDL.Func([], [IDL.Vec(Employee)], ['query']),
   'placeOrder' : IDL.Func(
       [
         IDL.Text,
@@ -155,6 +175,7 @@ export const idlService = IDL.Service({
         IDL.Int,
         IDL.Int,
         IDL.Int,
+        IDL.Opt(IDL.Nat),
       ],
       [IDL.Nat],
       [],
@@ -175,6 +196,7 @@ export const idlService = IDL.Service({
         IDL.Int,
         IDL.Int,
         Time,
+        IDL.Opt(IDL.Nat),
       ],
       [],
       [],
@@ -207,11 +229,11 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const OrderRecord = IDL.Record({
     'customerName' : IDL.Text,
     'deliveryAddress' : IDL.Text,
     'palletType' : IDL.Text,
+    'assignedTo' : IDL.Opt(IDL.Nat),
     'netWeight' : IDL.Int,
     'deliveryDate' : Time,
     'orderType' : IDL.Text,
@@ -224,21 +246,11 @@ export const idlFactory = ({ IDL }) => {
     'material' : IDL.Text,
     'pickupLocation' : IDL.Text,
   });
-  const OrderStats = IDL.Record({
-    'totalOrders' : IDL.Nat,
-    'totalNetWeight' : IDL.Nat,
-    'totalCutWeight' : IDL.Nat,
-    'totalGrossWeight' : IDL.Nat,
-  });
   const OtherServiceRecord = IDL.Record({
     'name' : IDL.Text,
     'phone' : IDL.Text,
     'amount' : IDL.Int,
     'remarks' : IDL.Text,
-  });
-  const OtherServiceStats = IDL.Record({
-    'totalCount' : IDL.Nat,
-    'totalAmount' : IDL.Nat,
   });
   const PiercingServiceRecord = IDL.Record({
     'date' : Time,
@@ -246,10 +258,6 @@ export const idlFactory = ({ IDL }) => {
     'phone' : IDL.Text,
     'amount' : IDL.Int,
     'remarks' : IDL.Text,
-  });
-  const PiercingStats = IDL.Record({
-    'totalCount' : IDL.Nat,
-    'totalAmount' : IDL.Nat,
   });
   const RepairOrderRecord = IDL.Record({
     'status' : IDL.Text,
@@ -263,15 +271,36 @@ export const idlFactory = ({ IDL }) => {
     'material' : IDL.Text,
     'makingCharge' : IDL.Int,
   });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const OrderStats = IDL.Record({
+    'totalOrders' : IDL.Nat,
+    'totalNetWeight' : IDL.Nat,
+    'totalCutWeight' : IDL.Nat,
+    'totalGrossWeight' : IDL.Nat,
+  });
+  const OtherServiceStats = IDL.Record({
+    'totalCount' : IDL.Nat,
+    'totalAmount' : IDL.Nat,
+  });
+  const PiercingStats = IDL.Record({
+    'totalCount' : IDL.Nat,
+    'totalAmount' : IDL.Nat,
+  });
   const RepairOrderStats = IDL.Record({
     'totalMaterialCost' : IDL.Nat,
     'totalOrders' : IDL.Nat,
     'totalMakingCharge' : IDL.Nat,
     'totalCost' : IDL.Nat,
   });
+  const Employee = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'phoneNo' : IDL.Text,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addEmployee' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
     'addOtherService' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Int, IDL.Text],
         [IDL.Nat],
@@ -298,6 +327,22 @@ export const idlFactory = ({ IDL }) => {
         ],
         [IDL.Nat],
         [],
+      ),
+    'getAllOrders' : IDL.Func([], [IDL.Vec(OrderRecord)], ['query']),
+    'getAllOtherServices' : IDL.Func(
+        [],
+        [IDL.Vec(OtherServiceRecord)],
+        ['query'],
+      ),
+    'getAllPiercingServices' : IDL.Func(
+        [],
+        [IDL.Vec(PiercingServiceRecord)],
+        ['query'],
+      ),
+    'getAllRepairOrders' : IDL.Func(
+        [],
+        [IDL.Vec(RepairOrderRecord)],
+        ['query'],
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
@@ -335,6 +380,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listEmployees' : IDL.Func([], [IDL.Vec(Employee)], ['query']),
     'placeOrder' : IDL.Func(
         [
           IDL.Text,
@@ -348,6 +394,7 @@ export const idlFactory = ({ IDL }) => {
           IDL.Int,
           IDL.Int,
           IDL.Int,
+          IDL.Opt(IDL.Nat),
         ],
         [IDL.Nat],
         [],
@@ -368,6 +415,7 @@ export const idlFactory = ({ IDL }) => {
           IDL.Int,
           IDL.Int,
           Time,
+          IDL.Opt(IDL.Nat),
         ],
         [],
         [],

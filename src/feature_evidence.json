@@ -1,4 +1,67 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-investigate-and-fix-the-data-fetching-issues-preventing-old-orders-from-loading-in-the-ordersview-component-specifically-addressing-the-getallorders-query-implementation",
+      "featureTitle": "Investigate and fix the data fetching issues preventing old orders from loading in the OrdersView component, specifically addressing the getAllOrders query implementation",
+      "files": [
+        "frontend/src/features/orders/useGetAllOrders.ts",
+        "frontend/src/lib/formatters.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-investigate-and-fix-the-data-fetching-issues-preventing-old-repair-orders-from-loading-in-the-repairordersview-component-specifically-addressing-the-getallrepairorders-query-implementation",
+      "featureTitle": "Investigate and fix the data fetching issues preventing old repair orders from loading in the RepairOrdersView component, specifically addressing the getAllRepairOrders query implementation",
+      "files": [
+        "frontend/src/features/repairs/RepairOrdersView.tsx",
+        "frontend/src/features/repairs/useGetAllRepairOrders.ts",
+        "frontend/src/lib/formatters.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-investigate-and-fix-the-data-fetching-issues-preventing-old-service-records-piercing-and-other-services-from-loading-in-their-respective-list-views-specifically-addressing-the-getallpiercingservices-and-getallotherservices-query-implementations",
+      "featureTitle": "Investigate and fix the data fetching issues preventing old service records (piercing and other services) from loading in their respective list views, specifically addressing the getAllPiercingServices and getAllOtherServices query implementations",
+      "files": [
+        "frontend/src/features/dashboard/DashboardView.tsx",
+        "frontend/src/features/misc/useGetAllOtherServices.ts",
+        "frontend/src/features/misc/useGetAllPiercingServices.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

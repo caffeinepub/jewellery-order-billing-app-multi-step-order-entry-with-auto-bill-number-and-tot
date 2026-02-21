@@ -19,6 +19,7 @@ export function usePlaceOrder() {
       netWeight: string;
       grossWeight: string;
       cutWeight: string;
+      assignedTo: string;
     }) => {
       if (!actor) {
         throw new Error('Backend actor not available');
@@ -27,7 +28,7 @@ export function usePlaceOrder() {
       console.log('=== Creating Order ===');
       console.log('Form data:', formData);
 
-      // Sanitize and validate weight fields
+      // Convert and validate weight fields
       const netWeight = sanitizeWeight(formData.netWeight);
       const grossWeight = sanitizeWeight(formData.grossWeight);
       const cutWeight = sanitizeWeight(formData.cutWeight);
@@ -37,10 +38,14 @@ export function usePlaceOrder() {
       validateBigIntRange(grossWeight, 'grossWeight', BigInt(0), BigInt(1000000));
       validateBigIntRange(cutWeight, 'cutWeight', BigInt(0), BigInt(1000000));
 
-      console.log('Converted weights:', {
+      // Convert assignedTo to bigint or null
+      const assignedTo = formData.assignedTo ? BigInt(formData.assignedTo) : null;
+
+      console.log('Converted values:', {
         netWeight: `${netWeight}n`,
         grossWeight: `${grossWeight}n`,
         cutWeight: `${cutWeight}n`,
+        assignedTo: assignedTo ? `${assignedTo}n` : 'null',
       });
 
       try {
@@ -55,10 +60,11 @@ export function usePlaceOrder() {
           formData.deliveryContact,
           netWeight,
           grossWeight,
-          cutWeight
+          cutWeight,
+          assignedTo
         );
 
-        console.log('✓ Order created successfully with bill number:', billNo);
+        console.log('✓ Order created successfully with Bill No:', billNo);
         return billNo;
       } catch (error: any) {
         console.error('✗ Backend error creating order:', error);
@@ -67,7 +73,7 @@ export function usePlaceOrder() {
       }
     },
     onSuccess: (billNo) => {
-      console.log('Order mutation succeeded, invalidating queries for bill:', billNo);
+      console.log('Order mutation succeeded, invalidating queries for Bill No:', billNo);
       queryClient.invalidateQueries({ queryKey: ['recentOrders'] });
       queryClient.invalidateQueries({ queryKey: ['orderStats'] });
     },

@@ -15,7 +15,7 @@ export function usePlaceRepairOrder() {
       makingCharge: string;
       totalCost: string;
       deliveryDate: string;
-      assignTo: string;
+      assignedTo?: string;
       status: string;
       deliveryStatus: string;
     }) => {
@@ -49,6 +49,7 @@ export function usePlaceRepairOrder() {
         makingCharge: `${makingCharge}n`,
         totalCost: `${totalCost}n`,
         deliveryDate: `${deliveryDate}n`,
+        assignedTo: formData.assignedTo || '',
       });
 
       try {
@@ -60,7 +61,7 @@ export function usePlaceRepairOrder() {
           makingCharge,
           totalCost,
           deliveryDate,
-          formData.assignTo,
+          formData.assignedTo || '',
           formData.status,
           formData.deliveryStatus
         );

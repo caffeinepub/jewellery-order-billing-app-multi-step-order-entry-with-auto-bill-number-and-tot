@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { useRecentOrders } from './useRecentOrders';
+import { useGetAllOrders } from './useGetAllOrders';
 import { formatDate, formatWeight } from '@/lib/formatters';
 import { Loader2, Edit, CheckCircle2 } from 'lucide-react';
 
@@ -14,7 +14,7 @@ interface OrdersViewProps {
 }
 
 export default function OrdersView({ onNewOrder, onEditOrder, successMessage }: OrdersViewProps) {
-  const { data: orders, isLoading, error } = useRecentOrders(50);
+  const { data: orders, isLoading, error } = useGetAllOrders();
 
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status.toLowerCase()) {
@@ -58,7 +58,7 @@ export default function OrdersView({ onNewOrder, onEditOrder, successMessage }: 
           {error && (
             <Alert variant="destructive">
               <AlertDescription>
-                Failed to load orders. Please try again.
+                {error instanceof Error ? error.message : 'Failed to load orders. Please try again.'}
               </AlertDescription>
             </Alert>
           )}

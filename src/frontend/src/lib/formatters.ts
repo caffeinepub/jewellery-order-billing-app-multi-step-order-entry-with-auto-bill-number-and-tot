@@ -2,19 +2,49 @@
  * Formats a timestamp (in nanoseconds) to a human-readable date string
  */
 export function formatDate(timestamp: bigint): string {
-  const date = new Date(Number(timestamp) / 1000000);
-  return date.toLocaleDateString('en-IN', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  });
+  try {
+    const milliseconds = Number(timestamp) / 1000000;
+    
+    if (milliseconds === 0 || isNaN(milliseconds)) {
+      console.warn('formatDate: Invalid timestamp (0 or NaN):', timestamp);
+      return 'Not set';
+    }
+    
+    const date = new Date(milliseconds);
+    
+    if (isNaN(date.getTime())) {
+      console.error('formatDate: Invalid date from timestamp:', timestamp, 'milliseconds:', milliseconds);
+      return 'Invalid date';
+    }
+    
+    return date.toLocaleDateString('en-IN', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch (error) {
+    console.error('formatDate: Error formatting date:', timestamp, error);
+    return 'Error';
+  }
 }
 
 /**
  * Formats weight from storage format (weight * 100) to display format with 2 decimal places
  */
 export function formatWeight(weight: bigint): string {
-  return (Number(weight) / 100).toFixed(2);
+  try {
+    const value = Number(weight) / 100;
+    
+    if (isNaN(value)) {
+      console.error('formatWeight: Invalid weight value:', weight);
+      return '0.00';
+    }
+    
+    return value.toFixed(2);
+  } catch (error) {
+    console.error('formatWeight: Error formatting weight:', weight, error);
+    return '0.00';
+  }
 }
 
 /**

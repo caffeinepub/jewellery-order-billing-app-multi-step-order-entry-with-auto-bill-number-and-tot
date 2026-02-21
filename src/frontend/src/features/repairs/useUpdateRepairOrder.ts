@@ -16,7 +16,7 @@ export function useUpdateRepairOrder() {
       makingCharge: string;
       totalCost: string;
       deliveryDate: string;
-      assignTo: string;
+      assignedTo?: string;
       status: string;
       deliveryStatus: string;
     }) => {
@@ -51,6 +51,7 @@ export function useUpdateRepairOrder() {
         makingCharge: `${makingCharge}n`,
         totalCost: `${totalCost}n`,
         deliveryDate: `${deliveryDate}n`,
+        assignedTo: formData.assignedTo || '',
       });
 
       try {
@@ -63,7 +64,7 @@ export function useUpdateRepairOrder() {
           makingCharge,
           totalCost,
           deliveryDate,
-          formData.assignTo,
+          formData.assignedTo || '',
           formData.status,
           formData.deliveryStatus
         );
@@ -76,10 +77,10 @@ export function useUpdateRepairOrder() {
       }
     },
     onSuccess: (_, variables) => {
-      console.log('Repair order update mutation succeeded for ID:', variables.repairId);
+      console.log('Repair order update mutation succeeded, invalidating queries for ID:', variables.repairId);
       queryClient.invalidateQueries({ queryKey: ['recentRepairOrders'] });
       queryClient.invalidateQueries({ queryKey: ['repairOrderStats'] });
-      queryClient.invalidateQueries({ queryKey: ['repairOrder', Number(variables.repairId)] });
+      queryClient.invalidateQueries({ queryKey: ['repairOrder', variables.repairId] });
     },
     onError: (error: any) => {
       console.error('=== Repair Order Update Failed ===');

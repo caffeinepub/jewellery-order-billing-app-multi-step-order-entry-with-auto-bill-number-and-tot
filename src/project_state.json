@@ -3,36 +3,55 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [],
+  "known_issues": [
+    "Error reported in app during Version 26 testing"
+  ],
   "isFixRequest": true,
-  "existing_features": [],
-  "new_feature_requests": [
+  "existing_features": [
     {
-      "id": "AR-1",
-      "summary": "Investigate and resolve the deployment error that occurred during the canister deployment process",
+      "id": "feature-investigate-and-fix-the-data-fetching-issues-preventing-old-orders-from-loading-in-the-ordersview-component-specifically-addressing-the-getallorders-query-implementation",
+      "title": "Investigate and fix the data fetching issues preventing old orders from loading in the OrdersView component, specifically addressing the getAllOrders query implementation",
       "reqIds": [
         "REQ-1"
       ],
-      "status": "pending"
+      "version": 1
     },
     {
-      "id": "AR-2",
-      "summary": "Ensure the migration.mo module correctly handles state transformation from userProfiles to persistentUserProfiles during canister upgrades",
+      "id": "feature-investigate-and-fix-the-data-fetching-issues-preventing-old-repair-orders-from-loading-in-the-repairordersview-component-specifically-addressing-the-getallrepairorders-query-implementation",
+      "title": "Investigate and fix the data fetching issues preventing old repair orders from loading in the RepairOrdersView component, specifically addressing the getAllRepairOrders query implementation",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-and-fix-the-data-fetching-issues-preventing-old-service-records-piercing-and-other-services-from-loading-in-their-respective-list-views-specifically-addressing-the-getallpiercingservices-and-getallotherservices-query-implementations",
+      "title": "Investigate and fix the data fetching issues preventing old service records (piercing and other services) from loading in their respective list views, specifically addressing the getAllPiercingServices and getAllOtherServices query implementations",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-4",
+      "summary": "Verify and fix any backend query methods that may be returning incorrect data types or missing fields for orders, repair orders, and service records",
+      "reqIds": [
+        "REQ-4"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-3",
-      "summary": "Verify that all backend Map data structures for orders, repair orders, piercing services, and other services are properly initialized and persisted",
+      "id": "AR-5",
+      "summary": "Add comprehensive error logging and debugging output to identify the root cause of data loading failures across all list views",
       "reqIds": [
-        "REQ-3"
+        "REQ-5"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix deployment error",
+  "projectName": "Debug and fix application error in Version 26",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

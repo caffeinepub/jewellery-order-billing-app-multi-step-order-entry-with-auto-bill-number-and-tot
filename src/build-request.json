@@ -1,66 +1,108 @@
 {
   "kind": "build_request",
-  "title": "Fix deployment error",
+  "title": "Debug and fix application error in Version 26",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Investigate and resolve the deployment error that occurred during the canister deployment process",
+      "text": "Investigate and fix the data fetching issues preventing old orders from loading in the OrdersView component, specifically addressing the getAllOrders query implementation",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "there is an error in app. please re check and fix the error"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All historical orders load successfully in the Orders table",
+        "No console errors related to order fetching",
+        "Order data displays correctly with all fields populated"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Investigate and fix the data fetching issues preventing old repair orders from loading in the RepairOrdersView component, specifically addressing the getAllRepairOrders query implementation",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "there is an error in app. please re check and fix the error"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All historical repair orders load successfully in the Repair Orders table",
+        "No console errors related to repair order fetching",
+        "Repair order data displays correctly with all fields including weights and costs"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Investigate and fix the data fetching issues preventing old service records (piercing and other services) from loading in their respective list views, specifically addressing the getAllPiercingServices and getAllOtherServices query implementations",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "there is an error in app. please re check and fix the error"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All historical piercing service records load successfully",
+        "All historical other service records load successfully",
+        "No console errors related to service record fetching",
+        "Service data displays correctly in their respective tables"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Verify and fix any backend query methods that may be returning incorrect data types or missing fields for orders, repair orders, and service records",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "please fix it"
+          "there is an error in app. please re check and fix the error"
         ]
       },
       "acceptanceCriteria": [
-        "Deployment completes successfully without errors",
-        "Canister is accessible and responsive after deployment",
-        "All existing functionality remains intact after deployment"
+        "Backend getAllOrders method returns data in the correct format expected by the frontend",
+        "Backend getAllRepairOrders method returns data in the correct format expected by the frontend",
+        "Backend getAllPiercingServices and getAllOtherServices methods return data in the correct format",
+        "All required fields are present in the returned data structures"
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Ensure the migration.mo module correctly handles state transformation from userProfiles to persistentUserProfiles during canister upgrades",
-      "target": "backend",
+      "id": "REQ-5",
+      "text": "Add comprehensive error logging and debugging output to identify the root cause of data loading failures across all list views",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ]
       },
       "acceptanceCriteria": [
-        "Migration logic preserves all existing user profile data",
-        "No data is lost during the upgrade process",
-        "The new persistent storage structure is correctly initialized"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Verify that all backend Map data structures for orders, repair orders, piercing services, and other services are properly initialized and persisted",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All data structures use stable storage mechanisms",
-        "Data persists correctly across canister upgrades",
-        "No runtime errors occur when accessing stored data"
+        "Clear error messages are logged to console when data fetching fails",
+        "Error messages indicate which specific query or data transformation step failed",
+        "User-friendly error states are displayed in the UI when data cannot be loaded"
       ]
     }
   ],
   "constraints": [
-    "Maintain the single-actor architecture in backend/main.mo",
-    "Preserve all existing frontend functionality and immutable paths",
-    "Do not modify the core authentication flow using Internet Identity"
+    "Do not modify the authentication flow or Internet Identity integration",
+    "Preserve existing data structures in backend storage",
+    "Maintain compatibility with recently created records that are loading successfully"
   ],
   "nonGoals": [
     "Adding new features or functionality",
-    "Refactoring unrelated code",
-    "Changing the technology stack"
+    "Changing the UI design or layout",
+    "Modifying the employee management system",
+    "Altering the order creation or editing workflows"
   ],
   "imageRequirements": {
     "required": [],

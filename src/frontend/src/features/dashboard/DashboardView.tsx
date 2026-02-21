@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,10 +11,12 @@ import { useRepairOrderStats } from '../repairs/useRepairOrderStats';
 import { useRecentRepairOrders } from '../repairs/useRecentRepairOrders';
 import { usePiercingServiceStats } from '../misc/usePiercingServiceStats';
 import { useOtherServiceStats } from '../misc/useOtherServiceStats';
-import { useRecentPiercingServices } from '../misc/useRecentPiercingServices';
-import { useRecentOtherServices } from '../misc/useRecentOtherServices';
+import { useGetAllPiercingServices } from '../misc/useGetAllPiercingServices';
+import { useGetAllOtherServices } from '../misc/useGetAllOtherServices';
+import { useListEmployees } from '../employees/useListEmployees';
+import EmployeeForm from '../employees/EmployeeForm';
 import { formatDate, formatWeight } from '@/lib/formatters';
-import { Package, Scale, TrendingUp, Loader2, Edit, Wrench, Scissors, Sparkles, Plus, ChevronDown } from 'lucide-react';
+import { Package, Scale, TrendingUp, Loader2, Edit, Wrench, Scissors, Sparkles, Plus, ChevronDown, Users, AlertTriangle } from 'lucide-react';
 
 interface DashboardViewProps {
   onNewOrder: () => void;
@@ -36,14 +39,23 @@ export default function DashboardView({
   onEditPiercing,
   onEditOther
 }: DashboardViewProps) {
+  const [employeeFormOpen, setEmployeeFormOpen] = useState(false);
+
   const { data: stats, isLoading: statsLoading, error: statsError } = useOrderStats();
   const { data: recentOrders, isLoading: ordersLoading, error: ordersError } = useRecentOrders(5);
   const { data: repairStats, isLoading: repairStatsLoading, error: repairStatsError } = useRepairOrderStats();
-  const { data: recentRepairs, isLoading: repairsLoading } = useRecentRepairOrders(5);
+  const { data: recentRepairs, isLoading: repairsLoading, error: repairsError } = useRecentRepairOrders(5);
   const { data: piercingStats, isLoading: piercingStatsLoading, error: piercingStatsError } = usePiercingServiceStats();
   const { data: otherStats, isLoading: otherStatsLoading, error: otherStatsError } = useOtherServiceStats();
-  const { data: recentPiercingServices, isLoading: piercingServicesLoading } = useRecentPiercingServices(5);
-  const { data: recentOtherServices, isLoading: otherServicesLoading } = useRecentOtherServices(5);
+  const { data: allPiercingServices, isLoading: piercingServicesLoading, error: piercingServicesError } = useGetAllPiercingServices();
+  const { data: allOtherServices, isLoading: otherServicesLoading, error: otherServicesError } = useGetAllOtherServices();
+  const { data: employees, isLoading: employeesLoading, error: employeesError } = useListEmployees();
+
+  console.log('DashboardView: Rendering dashboard');
+  console.log('DashboardView: Orders:', recentOrders?.length || 0, 'Error:', ordersError);
+  console.log('DashboardView: Repairs:', recentRepairs?.length || 0, 'Error:', repairsError);
+  console.log('DashboardView: Piercing services:', allPiercingServices?.length || 0, 'Error:', piercingServicesError);
+  console.log('DashboardView: Other services:', allOtherServices?.length || 0, 'Error:', otherServicesError);
 
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status.toLowerCase()) {
@@ -63,6 +75,30 @@ export default function DashboardView({
   const formatCurrency = (value: bigint): string => {
     return `₹${(Number(value) / 100).toFixed(2)}`;
   };
+
+  // Combine and sort all services by date (most recent first)
+  const allServices = [
+    ...(allPiercingServices || []).map((service, index) => ({
+      id: index + 1,
+      type: 'piercing' as const,
+      date: service.date,
+      name: service.name,
+      phone: service.phone,
+      amount: service.amount,
+      remarks: service.remarks
+    })),
+    ...(allOtherServices || []).map((service, index) => ({
+      id: index + 1,
+      type: 'other' as const,
+      date: BigInt(Date.now() * 1000000), // Other services don't have date, use current time
+      name: service.name,
+      phone: service.phone,
+      amount: service.amount,
+      remarks: service.remarks
+    }))
+  ].sort((a, b) => Number(b.date - a.date)).slice(0, 10);
+
+  console.log('DashboardView: Combined services:', allServices.length);
 
   return (
     <div className="space-y-6">
@@ -142,10 +178,10 @@ export default function DashboardView({
       </div>
 
       {/* Repair Order Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Repairs</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Repair Orders</CardTitle>
             <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -161,8 +197,8 @@ export default function DashboardView({
 
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Material Cost</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Material Cost</CardTitle>
+            <Scale className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {repairStatsLoading ? (
@@ -177,23 +213,7 @@ export default function DashboardView({
 
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Making Charge</CardTitle>
-            <Scale className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {repairStatsLoading ? (
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            ) : repairStatsError ? (
-              <p className="text-sm text-destructive">Error loading</p>
-            ) : (
-              <div className="text-2xl font-bold">{formatCurrency(repairStats?.totalMakingCharge || BigInt(0))}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-elegant">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Repair Cost</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -208,7 +228,7 @@ export default function DashboardView({
         </Card>
       </div>
 
-      {/* Misc Services Stats Cards */}
+      {/* Service Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="shadow-elegant">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -221,11 +241,11 @@ export default function DashboardView({
             ) : piercingStatsError ? (
               <p className="text-sm text-destructive">Error loading</p>
             ) : (
-              <div className="space-y-1">
+              <div>
                 <div className="text-2xl font-bold">{Number(piercingStats?.totalCount || 0)}</div>
-                <div className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-1">
                   Total: {formatCurrency(piercingStats?.totalAmount || BigInt(0))}
-                </div>
+                </p>
               </div>
             )}
           </CardContent>
@@ -242,47 +262,24 @@ export default function DashboardView({
             ) : otherStatsError ? (
               <p className="text-sm text-destructive">Error loading</p>
             ) : (
-              <div className="space-y-1">
+              <div>
                 <div className="text-2xl font-bold">{Number(otherStats?.totalCount || 0)}</div>
-                <div className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-1">
                   Total: {formatCurrency(otherStats?.totalAmount || BigInt(0))}
-                </div>
+                </p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Material Breakdown */}
-      {stats && (
-        <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle>Material Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Cut Weight:</span>
-                <span className="font-semibold">{formatWeight(stats.totalCutWeight)} gm</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 1. Recent Orders Preview */}
+      {/* Recent Orders */}
       <Card className="shadow-elegant">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Recent Orders</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onNewOrder}>
-              <Plus className="h-4 w-4 mr-1" />
-              New Order
-            </Button>
-            <Button variant="outline" size="sm" onClick={onViewOrders}>
-              View All
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onClick={onViewOrders}>
+            View All
+          </Button>
         </CardHeader>
         <CardContent>
           {ordersLoading && (
@@ -294,14 +291,14 @@ export default function DashboardView({
           {ordersError && (
             <Alert variant="destructive">
               <AlertDescription>
-                Failed to load recent orders. Please try again.
+                {ordersError instanceof Error ? ordersError.message : 'Failed to load orders'}
               </AlertDescription>
             </Alert>
           )}
 
           {recentOrders && recentOrders.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              No orders yet. Create your first order!
+              No orders yet
             </div>
           )}
 
@@ -310,22 +307,22 @@ export default function DashboardView({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Bill No</TableHead>
+                    <TableHead>Bill No.</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Customer</TableHead>
-                    <TableHead>Order Type</TableHead>
                     <TableHead>Material</TableHead>
-                    <TableHead className="text-right">Net Weight</TableHead>
+                    <TableHead className="text-right">Net Wt. (gm)</TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {recentOrders.map((order) => (
                     <TableRow key={Number(order.billNo)}>
-                      <TableCell className="font-medium">{Number(order.billNo)}</TableCell>
+                      <TableCell className="font-medium">#{Number(order.billNo)}</TableCell>
+                      <TableCell>{formatDate(order.timestamp)}</TableCell>
                       <TableCell>{order.customerName}</TableCell>
-                      <TableCell>{order.orderType}</TableCell>
                       <TableCell>{order.material}</TableCell>
-                      <TableCell className="text-right">{formatWeight(order.netWeight)} gm</TableCell>
+                      <TableCell className="text-right">{formatWeight(order.netWeight)}</TableCell>
                       <TableCell className="text-center">
                         <Button
                           variant="ghost"
@@ -345,19 +342,13 @@ export default function DashboardView({
         </CardContent>
       </Card>
 
-      {/* 2. Recent Repair Orders Preview with Add New Button */}
+      {/* Recent Repair Orders */}
       <Card className="shadow-elegant">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Recent Repair Orders</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onNewRepairOrder}>
-              <Plus className="h-4 w-4 mr-1" />
-              New Repair Order
-            </Button>
-            <Button variant="outline" size="sm" onClick={onViewRepairs}>
-              View All
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onClick={onViewRepairs}>
+            View All
+          </Button>
         </CardHeader>
         <CardContent>
           {repairsLoading && (
@@ -366,9 +357,17 @@ export default function DashboardView({
             </div>
           )}
 
+          {repairsError && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {repairsError instanceof Error ? repairsError.message : 'Failed to load repair orders'}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {recentRepairs && recentRepairs.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              No repair orders yet. Create your first repair order!
+              No repair orders yet
             </div>
           )}
 
@@ -380,9 +379,7 @@ export default function DashboardView({
                     <TableHead>Date</TableHead>
                     <TableHead>Material</TableHead>
                     <TableHead className="text-right">Total Cost</TableHead>
-                    <TableHead>Assigned To</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -391,21 +388,10 @@ export default function DashboardView({
                       <TableCell>{formatDate(repair.date)}</TableCell>
                       <TableCell>{repair.material}</TableCell>
                       <TableCell className="text-right font-semibold">{formatCurrency(repair.totalCost)}</TableCell>
-                      <TableCell>{repair.assignTo}</TableCell>
                       <TableCell>
                         <Badge variant={getStatusBadgeVariant(repair.status)}>
                           {repair.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditRepair(index + 1)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -416,111 +402,133 @@ export default function DashboardView({
         </CardContent>
       </Card>
 
-      {/* 3. Recent Piercing Services */}
-      {recentPiercingServices && recentPiercingServices.length > 0 && (
-        <Card className="shadow-elegant">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Piercing Services</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {piercingServicesLoading && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            )}
+      {/* All Services Table */}
+      <Card className="shadow-elegant">
+        <CardHeader>
+          <CardTitle>Recent Services</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(piercingServicesLoading || otherServicesLoading) && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
 
-            {recentPiercingServices && recentPiercingServices.length > 0 && (
+          {(piercingServicesError || otherServicesError) && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>
+                {piercingServicesError instanceof Error ? piercingServicesError.message : 
+                 otherServicesError instanceof Error ? otherServicesError.message : 
+                 'Failed to load services'}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {allServices.length === 0 && !piercingServicesLoading && !otherServicesLoading && (
+            <div className="text-center py-8 text-muted-foreground">
+              No services yet
+            </div>
+          )}
+
+          {allServices.length > 0 && (
+            <>
+              <Alert className="border-warning bg-warning/10 mb-4">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                <AlertDescription>
+                  Note: Service records are displayed for viewing only. Editing is temporarily disabled due to a backend limitation.
+                </AlertDescription>
+              </Alert>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Type</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead>Remarks</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentPiercingServices.map((service, index) => (
-                      <TableRow key={index}>
+                    {allServices.map((service, index) => (
+                      <TableRow key={`${service.type}-${index}`}>
+                        <TableCell>
+                          <Badge variant={service.type === 'piercing' ? 'default' : 'secondary'}>
+                            {service.type === 'piercing' ? 'Piercing' : 'Other'}
+                          </Badge>
+                        </TableCell>
                         <TableCell>{formatDate(service.date)}</TableCell>
                         <TableCell>{service.name}</TableCell>
                         <TableCell>{service.phone}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatCurrency(service.amount)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(service.amount)}</TableCell>
                         <TableCell className="max-w-xs truncate">{service.remarks || '-'}</TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEditPiercing(index + 1)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* 4. Recent Other Services */}
-      {recentOtherServices && recentOtherServices.length > 0 && (
-        <Card className="shadow-elegant">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Other Services</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {otherServicesLoading && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            )}
+      {/* Employees Section */}
+      <Card className="shadow-elegant">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Employees</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => setEmployeeFormOpen(true)}>
+            <Users className="h-4 w-4 mr-2" />
+            Add Employee
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {employeesLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
 
-            {recentOtherServices && recentOtherServices.length > 0 && (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Remarks</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
+          {employeesError && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {employeesError instanceof Error ? employeesError.message : 'Failed to load employees'}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {employees && employees.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No employees yet. Add your first employee to get started.
+            </div>
+          )}
+
+          {employees && employees.length > 0 && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {employees.map((employee) => (
+                    <TableRow key={Number(employee.id)}>
+                      <TableCell className="font-medium">#{Number(employee.id)}</TableCell>
+                      <TableCell>{employee.name}</TableCell>
+                      <TableCell>{employee.phoneNo}</TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentOtherServices.map((service, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{service.name}</TableCell>
-                        <TableCell>{service.phone}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatCurrency(service.amount)}</TableCell>
-                        <TableCell className="max-w-xs truncate">{service.remarks || '-'}</TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEditOther(index + 1)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <EmployeeForm open={employeeFormOpen} onOpenChange={setEmployeeFormOpen} />
     </div>
   );
 }

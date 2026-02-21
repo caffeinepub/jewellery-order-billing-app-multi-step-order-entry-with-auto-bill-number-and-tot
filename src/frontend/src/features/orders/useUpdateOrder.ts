@@ -21,6 +21,7 @@ export function useUpdateOrder() {
       grossWeight: string;
       cutWeight: string;
       deliveryDate: string;
+      assignedTo: string;
     }) => {
       if (!actor) {
         throw new Error('Backend actor not available');
@@ -30,10 +31,12 @@ export function useUpdateOrder() {
       console.log('Bill No:', formData.billNo);
       console.log('Form data:', formData);
 
-      // Sanitize and validate weight fields
+      // Convert and validate weight fields
       const netWeight = sanitizeWeight(formData.netWeight);
       const grossWeight = sanitizeWeight(formData.grossWeight);
       const cutWeight = sanitizeWeight(formData.cutWeight);
+
+      // Convert delivery date
       const deliveryDate = dateToNanoseconds(formData.deliveryDate);
 
       // Validate converted values
@@ -42,11 +45,15 @@ export function useUpdateOrder() {
       validateBigIntRange(cutWeight, 'cutWeight', BigInt(0), BigInt(1000000));
       validateBigIntRange(deliveryDate, 'deliveryDate', BigInt(0), BigInt(Number.MAX_SAFE_INTEGER));
 
+      // Convert assignedTo to bigint or null
+      const assignedTo = formData.assignedTo ? BigInt(formData.assignedTo) : null;
+
       console.log('Converted values:', {
         netWeight: `${netWeight}n`,
         grossWeight: `${grossWeight}n`,
         cutWeight: `${cutWeight}n`,
         deliveryDate: `${deliveryDate}n`,
+        assignedTo: assignedTo ? `${assignedTo}n` : 'null',
       });
 
       try {
@@ -63,7 +70,8 @@ export function useUpdateOrder() {
           netWeight,
           grossWeight,
           cutWeight,
-          deliveryDate
+          deliveryDate,
+          assignedTo
         );
 
         console.log('✓ Order updated successfully');
@@ -74,10 +82,10 @@ export function useUpdateOrder() {
       }
     },
     onSuccess: (_, variables) => {
-      console.log('Order update mutation succeeded for bill:', variables.billNo);
+      console.log('Order update mutation succeeded, invalidating queries for Bill No:', variables.billNo);
       queryClient.invalidateQueries({ queryKey: ['recentOrders'] });
       queryClient.invalidateQueries({ queryKey: ['orderStats'] });
-      queryClient.invalidateQueries({ queryKey: ['order', Number(variables.billNo)] });
+      queryClient.invalidateQueries({ queryKey: ['order', variables.billNo] });
     },
     onError: (error: any) => {
       console.error('=== Order Update Failed ===');

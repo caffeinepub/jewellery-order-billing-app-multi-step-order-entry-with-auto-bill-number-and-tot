@@ -15,7 +15,7 @@ export interface RepairFormData {
   makingCharge: string;
   totalCost: string;
   deliveryDate: string;
-  assignTo: string;
+  assignedTo?: string;
   status: RepairStatus | '';
   deliveryStatus: DeliveryStatus | '';
 }
@@ -28,7 +28,7 @@ export const initialRepairFormData: RepairFormData = {
   makingCharge: '0',
   totalCost: '0',
   deliveryDate: '',
-  assignTo: '',
+  assignedTo: '',
   status: 'On process',
   deliveryStatus: 'Pending'
 };

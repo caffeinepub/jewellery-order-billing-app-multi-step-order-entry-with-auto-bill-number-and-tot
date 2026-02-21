@@ -10,10 +10,12 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Employee { 'id' : bigint, 'name' : string, 'phoneNo' : string }
 export interface OrderRecord {
   'customerName' : string,
   'deliveryAddress' : string,
   'palletType' : string,
+  'assignedTo' : [] | [bigint],
   'netWeight' : bigint,
   'deliveryDate' : Time,
   'orderType' : string,
@@ -75,6 +77,7 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addEmployee' : ActorMethod<[string, string], bigint>,
   'addOtherService' : ActorMethod<[string, string, bigint, string], bigint>,
   'addPiercingService' : ActorMethod<
     [Time, string, string, bigint, string],
@@ -96,6 +99,10 @@ export interface _SERVICE {
     ],
     bigint
   >,
+  'getAllOrders' : ActorMethod<[], Array<OrderRecord>>,
+  'getAllOtherServices' : ActorMethod<[], Array<OtherServiceRecord>>,
+  'getAllPiercingServices' : ActorMethod<[], Array<PiercingServiceRecord>>,
+  'getAllRepairOrders' : ActorMethod<[], Array<RepairOrderRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getOrder' : ActorMethod<[bigint], OrderRecord>,
@@ -115,6 +122,7 @@ export interface _SERVICE {
   'getRepairOrderStats' : ActorMethod<[], RepairOrderStats>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listEmployees' : ActorMethod<[], Array<Employee>>,
   'placeOrder' : ActorMethod<
     [
       string,
@@ -128,6 +136,7 @@ export interface _SERVICE {
       bigint,
       bigint,
       bigint,
+      [] | [bigint],
     ],
     bigint
   >,
@@ -147,6 +156,7 @@ export interface _SERVICE {
       bigint,
       bigint,
       Time,
+      [] | [bigint],
     ],
     undefined
   >,

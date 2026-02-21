@@ -40,9 +40,9 @@ export interface OrderFormData {
   otherCharge: string;
   totalCost: string;
   
-  // Step 4: Delivery/Assignment/Status
+  // Step 4: Delivery/Status
   deliveryDate: string;
-  assignTo: string;
+  assignedTo?: string;
   status: string;
   remarks: string;
 }
@@ -65,7 +65,7 @@ export const initialFormData: OrderFormData = {
   otherCharge: '0',
   totalCost: '0',
   deliveryDate: '',
-  assignTo: '',
+  assignedTo: '',
   status: 'Pending',
   remarks: ''
 };
