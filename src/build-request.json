@@ -1,48 +1,44 @@
 {
   "kind": "build_request",
-  "title": "Fix data loss and order save failures",
+  "title": "Fix deployment error",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Investigate and fix the root cause of data loss affecting all saved information in the backend, ensuring stable canister state persistence across upgrades",
+      "text": "Investigate and resolve the deployment error that occurred during the canister deployment process",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "all my data is loss"
+          "please fix it"
         ]
       },
       "acceptanceCriteria": [
-        "Existing data persists correctly across canister upgrades",
-        "No data is lost when creating new records",
-        "Backend state variables maintain their values between deployments"
+        "Deployment completes successfully without errors",
+        "Canister is accessible and responsive after deployment",
+        "All existing functionality remains intact after deployment"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the order save functionality to ensure orders can be successfully created and persisted without errors",
+      "text": "Ensure the migration.mo module correctly handles state transformation from userProfiles to persistentUserProfiles during canister upgrades",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
-        ],
-        "quotes": [
-          "i am not able to save orders"
         ]
       },
       "acceptanceCriteria": [
-        "New orders can be created successfully through the OrderWizard",
-        "Order data is correctly stored in the backend",
-        "No errors occur during the order creation process",
-        "Saved orders appear in the recent orders list immediately after creation"
+        "Migration logic preserves all existing user profile data",
+        "No data is lost during the upgrade process",
+        "The new persistent storage structure is correctly initialized"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add proper stable storage declarations for all state variables in the backend to prevent data loss during canister upgrades",
+      "text": "Verify that all backend Map data structures for orders, repair orders, piercing services, and other services are properly initialized and persisted",
       "target": "backend",
       "source": {
         "messageIds": [
@@ -50,38 +46,21 @@
         ]
       },
       "acceptanceCriteria": [
-        "All state variables (orders, repair orders, piercing services, other services, user profiles) use stable storage",
-        "Data survives canister upgrades without loss",
-        "nextBillNo counter maintains its value across upgrades"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Clear error messages are displayed when order save fails",
-        "Frontend properly handles and displays backend error responses",
-        "User receives feedback about what went wrong during save operations"
+        "All data structures use stable storage mechanisms",
+        "Data persists correctly across canister upgrades",
+        "No runtime errors occur when accessing stored data"
       ]
     }
   ],
   "constraints": [
-    "Maintain single-actor architecture in backend/main.mo",
-    "Preserve existing Internet Identity authentication flow",
-    "Keep all existing UI components and routing structure intact",
-    "Do not modify read-only paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui"
+    "Maintain the single-actor architecture in backend/main.mo",
+    "Preserve all existing frontend functionality and immutable paths",
+    "Do not modify the core authentication flow using Internet Identity"
   ],
   "nonGoals": [
-    "Adding new features beyond fixing the save and data loss issues",
-    "Redesigning the UI or changing the visual appearance",
-    "Modifying the authentication system",
-    "Adding new service types or order fields"
+    "Adding new features or functionality",
+    "Refactoring unrelated code",
+    "Changing the technology stack"
   ],
   "imageRequirements": {
     "required": [],

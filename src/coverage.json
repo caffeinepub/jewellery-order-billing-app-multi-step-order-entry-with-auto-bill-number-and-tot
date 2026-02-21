@@ -1,62 +1,35 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-21T19:22:22.312Z",
+  "generatedAt": "2026-02-21T19:39:17.857Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 0,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Investigate and fix the root cause of data loss affecting all saved information in the backend, ensuring stable canister state persistence across upgrades",
+        "summary": "Investigate and resolve the deployment error that occurred during the canister deployment process",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Fix the order save functionality to ensure orders can be successfully created and persisted without errors",
+        "summary": "Ensure the migration.mo module correctly handles state transformation from userProfiles to persistentUserProfiles during canister upgrades",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Add proper stable storage declarations for all state variables in the backend to prevent data loss during canister upgrades",
+        "summary": "Verify that all backend Map data structures for orders, repair orders, piercing services, and other services are properly initialized and persisted",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/orders/usePlaceOrder.ts",
-          "frontend/src/features/orders/useUpdateOrder.ts",
-          "frontend/src/features/orders/OrderWizard.tsx",
-          "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-          "frontend/src/features/repairs/useUpdateRepairOrder.ts",
-          "frontend/src/features/repairs/RepairWizard.tsx",
-          "frontend/src/features/misc/usePlacePiercingService.ts",
-          "frontend/src/features/misc/PiercingWizard.tsx",
-          "frontend/src/features/misc/usePlaceOtherService.ts",
-          "frontend/src/features/misc/OtherWizard.tsx",
-          "frontend/src/lib/formatters.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/orders/usePlaceOrder.ts",
-          "frontend/src/features/orders/useUpdateOrder.ts",
-          "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-          "frontend/src/features/repairs/useUpdateRepairOrder.ts",
-          "frontend/src/features/misc/usePlacePiercingService.ts",
-          "frontend/src/features/misc/usePlaceOtherService.ts",
-          "frontend/src/lib/formatters.ts"
-        ]
       }
     ]
   },
@@ -65,15 +38,11 @@
     "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/features/misc/usePlaceOtherService.ts",
-    "frontend/src/features/misc/usePlacePiercingService.ts",
-    "frontend/src/features/orders/usePlaceOrder.ts",
-    "frontend/src/features/orders/useUpdateOrder.ts",
-    "frontend/src/features/repairs/usePlaceRepairOrder.ts",
-    "frontend/src/features/repairs/useUpdateRepairOrder.ts",
-    "frontend/src/lib/formatters.ts",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

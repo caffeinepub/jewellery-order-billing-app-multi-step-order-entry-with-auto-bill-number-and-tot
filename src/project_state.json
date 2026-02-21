@@ -3,25 +3,13 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Data loss issue affecting saved information",
-    "Orders cannot be saved successfully"
-  ],
+  "known_issues": [],
   "isFixRequest": true,
-  "existing_features": [
-    {
-      "id": "feature-verify-and-fix-frontend-error-handling-and-data-validation-in-the-orderwizard-to-ensure-proper-error-messages-are-shown-if-backend-operations-fail",
-      "title": "Verify and fix frontend error handling and data validation in the OrderWizard to ensure proper error messages are shown if backend operations fail",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    }
-  ],
+  "existing_features": [],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Investigate and fix the root cause of data loss affecting all saved information in the backend, ensuring stable canister state persistence across upgrades",
+      "summary": "Investigate and resolve the deployment error that occurred during the canister deployment process",
       "reqIds": [
         "REQ-1"
       ],
@@ -29,7 +17,7 @@
     },
     {
       "id": "AR-2",
-      "summary": "Fix the order save functionality to ensure orders can be successfully created and persisted without errors",
+      "summary": "Ensure the migration.mo module correctly handles state transformation from userProfiles to persistentUserProfiles during canister upgrades",
       "reqIds": [
         "REQ-2"
       ],
@@ -37,14 +25,14 @@
     },
     {
       "id": "AR-3",
-      "summary": "Add proper stable storage declarations for all state variables in the backend to prevent data loss during canister upgrades",
+      "summary": "Verify that all backend Map data structures for orders, repair orders, piercing services, and other services are properly initialized and persisted",
       "reqIds": [
         "REQ-3"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix data loss and order save failures",
+  "projectName": "Fix deployment error",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
